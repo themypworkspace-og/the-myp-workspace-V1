@@ -31,6 +31,30 @@
     <link rel="shortcut icon" href="favicon.ico">
 
     <style>
+        /* Fullscreen styling */
+:fullscreen .header, :fullscreen .instructions-section {
+    display: none;
+}
+
+:fullscreen #workspace-container {
+    height: 100vh !important;
+    width: 100vw !important;
+}
+
+.fullscreen-btn {
+    background: #e67e22; /* Warning orange color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.fullscreen-btn:hover {
+    background: #d35400;
+}
         :root { --ib-blue: #005a96; --ib-light: #f4f7f9; --dark: #333; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: white; }
 
@@ -115,6 +139,7 @@ style="width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-rad
         <div style="display:flex; gap:20px; align-items:center;">
             Set Timer: <input type="text" id="timer-input" value="02:00:00" style="width:110px; text-align:center; padding:10px; border-radius:5px; border:none; font-weight:bold;">
             <button class="btn btn-green" style="margin-left:auto; padding: 15px 40px; font-size: 18px;" onclick="launch()">Launch Workspace</button>
+            <button onclick="toggleFullscreen()" class="fullscreen-btn">🖥️ Enter Mock Exam Mode</button>
         </div>
     </div>
 
@@ -181,6 +206,24 @@ style="width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-rad
 </div>
 
 <script>
+    function toggleFullscreen() {
+    let elem = document.documentElement; // This targets the whole page
+
+    if (!document.fullscreenElement) {
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE11 */
+            elem.msRequestFullscreen();
+        }
+        alert("Exam Mode Active: Press 'Esc' to exit.");
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
     let seconds = 7200, running = false;
 
     function confirmReset() {
@@ -264,6 +307,7 @@ style="width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-rad
 </script>
 </body>
 </html>
+
 
 
 
