@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The MYP Workspace - Practice Environment</title>
+    
+    <meta name="description" content="The MYP Workspace: A free, student-led practice environment for IB MYP e-Assessments. Use integrated math and drawing tools to practice past papers.">
+    <meta name="author" content="Yogen Jayesh Patel">
+    <meta name="keywords" content="IB MYP, e-Assessment, Practice Paper, MYP Mathematics, Yogen Jayesh Patel, Fountainhead School, Surat, Gujarat, Exam Simulator, IB World, Polypad, Desmos">
+    <meta name="robots" content="index, follow">
+
+    <meta name="google-site-verification" content="YOUR_CODE_HERE" />
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+
+    <style>
+        :root { --ib-blue: #005a96; --ib-light: #f4f7f9; --dark: #333; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: white; }
+
+        #cookie-popup { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #333; color: white; padding: 20px; border-radius: 8px; z-index: 20000; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); }
+        
+        #splash-screen { position: fixed; inset: 0; background: #fff; z-index: 10000; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 40px; }
+        .hero-section { max-width: 1100px; width: 100%; text-align: center; margin-bottom: 20px; }
+        
+        .start-box { width: 100%; max-width: 1100px; background: var(--ib-blue); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; box-sizing: border-box; }
+        
+        .setup-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; max-width: 1100px; width: 100%; margin-bottom: 50px;}
+        .info-card { background: #f9f9f9; padding: 20px; border-radius: 12px; border: 1px solid #eee; text-align: left; font-size: 13px; line-height: 1.5; color: #444; }
+        .info-card h3 { color: var(--ib-blue); border-bottom: 2px solid #eee; padding-bottom: 8px; margin-top: 0; font-size: 16px; }
+
+        header { background: var(--ib-blue); color: white; height: 55px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-sizing: border-box; }
+        .header-logo { font-weight: bold; font-size: 18px; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+        
+        .main-container { display: flex; height: calc(100vh - 55px); width: 100%; }
+        .pane { height: 100%; flex: 1; position: relative; border-right: 1px solid #ccc; }
+        #work-pane { background: white; overflow-y: auto; padding: 25px; box-sizing: border-box; }
+
+        .q-block { border: 1px solid #ddd; margin-bottom: 30px; border-radius: 8px; background: #fff; position: relative; }
+        .q-header { background: #f1f1f1; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; }
+        .q-print-label { display: none; font-weight: bold; font-size: 1.2em; }
+        .ans-editable { min-height: 250px; padding: 25px; outline: none; border: 1px solid #eee; margin: 15px; background-image: radial-gradient(#d1d1d1 1px, transparent 1px); background-size: 30px 30px; background-color: #fafafa; font-size: 16px; }
+        .ans-editable img { max-width: 100%; border: 1px solid #999; margin: 15px 0; display: block; background: white; }
+
+        .tool-window { position: absolute; z-index: 5000; background: white; border: 2px solid var(--ib-blue); border-radius: 8px; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.3); overflow: hidden; }
+        .tool-nav { background: var(--ib-blue); color: white; padding: 10px; cursor: move; display: flex; justify-content: space-between; }
+        .tool-credit { font-size: 11px; background: #fffbe6; padding: 8px 10px; text-align: center; color: #856404; border-bottom: 1px solid #ffeeba; }
+        
+        .btn { padding: 8px 16px; cursor: pointer; border: none; border-radius: 4px; font-weight: 600; font-family: inherit; transition: 0.2s; }
+        .btn-ib { background: var(--ib-blue); color: white; }
+        .btn-green { background: #28a745; color: white; }
+        .btn-danger { background: #cc0000; color: white; font-size: 12px; }
+
+        /* Terms Modal Style */
+        #terms-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:30000; padding:50px; overflow-y:auto; }
+        .modal-content { background:white; max-width:800px; margin:auto; padding:40px; border-radius:12px; line-height:1.6; }
+
+        @media print {
+            header, .pane:first-child, .btn, .tool-window, .q-selector, #cookie-popup, input[type="file"], .snip-hint { display: none !important; }
+            .pane { width: 100% !important; border: none !important; overflow: visible !important; }
+            #work-pane { overflow: visible !important; padding: 0 !important; }
+            .q-block { border: none !important; border-bottom: 2px solid #eee !important; page-break-inside: avoid; }
+            .ans-editable { border: none !important; background: none !important; }
+            .q-print-label { display: block !important; margin-bottom: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="terms-modal">
+    <div class="modal-content">
+        <h2 style="color:var(--ib-blue)">Terms and Conditions</h2>
+        <p><b>1. Nature of Service:</b> The MYP Workspace is an independent, student-led "Browser Shell." It does not host, store, or distribute copyrighted International Baccalaureate® (IB) materials. All exam papers loaded are provided via external URLs by the end-user.</p>
+        <p><b>2. Third-Party Tools & Attribution:</b> This platform integrates third-party educational tools including Desmos and Polypad under their respective embed licenses. The <b>Equation Editor</b> is property of <b>Fountainhead School, Surat</b>. Per the <i>Fair Use</i> doctrine for educational purposes, this tool is utilized with full credit and attribution. This use does not imply endorsement by the school, nor does the school bear liability for this independent platform.</p>
+        <p><b>3. Intellectual Property:</b> "MYP" and "International Baccalaureate" are trademarks of the IB Organization. This site is not affiliated with, endorsed by, or connected to the IBO.</p>
+        <p><b>4. Data Privacy:</b> We do not collect personal data. All work is stored locally in your browser session and is deleted upon refresh unless saved as a PDF by the user.</p>
+        <button class="btn btn-ib" onclick="$('#terms-modal').hide()">I Understand</button>
+    </div>
+</div>
+
+<div id="cookie-popup">
+    <div style="font-size: 13px; padding-right: 20px;">
+        <b>The MYP Workspace</b> is a legal, independent tool for student practice.
+        <a href="#" style="color: #4db8ff;" onclick="$('#terms-modal').show()">Read Detailed Terms & Conditions</a>
+    </div>
+    <button class="btn btn-green" onclick="$('#cookie-popup').fadeOut()">Accept</button>
+</div>
+
+<div id="splash-screen">
+    <div class="hero-section">
+        <h1 style="color: var(--ib-blue); font-size: 48px; margin-bottom: 5px;">The MYP Workspace</h1>
+        <p style="color: #666; font-size: 18px;">Built by <b>Yogen Jayesh Patel</b> — Elevating Digital Exam Readiness.</p>
+    </div>
+
+    <div class="start-box">
+        <h3 style="margin-top:0;">🚀 Launch Your Session</h3>
+        <input type="text" id="pdf-url" placeholder="Enter Past Paper PDF URL (e.g. from a public drive or website)" style="width:100%; padding:15px; margin-bottom:15px; border:none; border-radius:8px; font-size: 16px;">
+        <div style="display:flex; gap:20px; align-items:center;">
+            Set Timer: <input type="text" id="timer-input" value="02:00:00" style="width:110px; text-align:center; padding:10px; border-radius:5px; border:none; font-weight:bold;">
+            <button class="btn btn-green" style="margin-left:auto; padding: 15px 40px; font-size: 18px;" onclick="launch()">Launch Workspace</button>
+        </div>
+    </div>
+
+    <div class="setup-grid">
+        <div class="info-card">
+            <h3>📖 Detailed Instructions</h3>
+            <p><b>1. Find a Paper:</b> Search for an MYP Past Paper online and copy its URL. Paste it into the blue box above.</p>
+            <p><b>2. Set the Pace:</b> Adjust the timer to match the official exam duration (usually 1h 30m or 2h).</p>
+            <p><b>3. Use the Tools:</b> Open the Equation Editor for math, Polypad for geometry, and Desmos for calculations.</p>
+            <p><b>4. Transfer Work:</b> Since browsers prevent direct drawing inside text boxes, use <b>Snip & Sketch (Win+Shift+S)</b> or <b>Mac Screenshot (Cmd+Shift+4)</b>, then click the answer box and <b>Paste (Ctrl+V)</b>.</p>
+            <p><b>5. Export:</b> Click "Save as PDF" to generate a professional-looking submission of your work.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>👋 Our Story</h3>
+            <p>My name is <b>Yogen Jayesh Patel</b>. Transitioning from IGCSE to the MYP e-Assessment in Grade 10 was a massive shift. I realized that while we have access to "Formative," we could only use it for teacher-assigned tasks.</p>
+            <p>When I wanted to practice past papers independently, I found myself stuck between a PDF and a Google Doc, which feels nothing like the real exam software. I created <b>The MYP Workspace</b> to provide every student with a realistic, high-fidelity practice environment. This platform is built for students, by a student, to ensure no one enters their finals feeling unfamiliar with the digital tools.</p>
+        </div>
+
+        <div class="info-card">
+            <h3>📩 Support & Feedback</h3>
+            <p>This is a live project. If you find a bug or have a suggestion to make the experience more realistic, please reach out.</p>
+            <p><b>Email:</b> <a href="mailto:the.myp.workspace@gmail.com">the.myp.workspace@gmail.com</a></p>
+            <p style="font-size: 11px; margin-top:20px;"><b>Credits:</b> Special attribution to <b>Fountainhead School, Surat</b> for the Equation Editor tool. This platform is independent and educational.</p>
+        </div>
+    </div>
+</div>
+
+<header>
+    <div class="header-logo" onclick="confirmReset()">The MYP Workspace</div>
+    <div id="timer-txt">02:00:00</div>
+    <div>
+        <button class="btn btn-ib" onclick="toggleLR()">Swap Sides</button>
+        <button class="btn btn-ib" onclick="openTool('math-tool')">Σ Equations</button>
+        <button class="btn btn-ib" onclick="openTool('draw-tool')">✎ Drawing</button>
+        <button class="btn btn-ib" onclick="openTool('calc-tool')">Calc</button>
+        <button class="btn" style="background:#cc0000; color:white;" onclick="toggleTimer()" id="p-btn">Pause</button>
+    </div>
+</header>
+
+<div class="main-container" id="layout-box">
+    <div class="pane"><iframe id="pdf-frame" width="100%" height="100%" style="border:none;"></iframe></div>
+    <div class="pane" id="work-pane">
+        <div id="q-list"></div>
+        <button class="btn btn-ib" style="width:100%; margin-bottom: 20px;" onclick="addQ()">+ Add Answer Box</button>
+        <button class="btn btn-green" style="width:100%; padding: 15px;" onclick="prepareAndPrint()">🖨️ Save as PDF</button>
+    </div>
+</div>
+
+<div id="math-tool" class="tool-window" style="width:600px; height:530px; top:80px; left:80px;">
+    <div class="tool-nav"><span>Equation Editor</span><span onclick="closeTool('math-tool')" style="cursor:pointer">×</span></div>
+    <div class="tool-credit">Provided by <b>Fountainhead School, Surat, Gujarat, India</b>. Used for educational purposes.</div>
+    <iframe src="https://nucleus.fountainheadschools.org/PARCC.html" width="100%" height="460px" style="border:none;"></iframe>
+</div>
+
+<div id="draw-tool" class="tool-window" style="width:850px; height:600px; top:40px; left:40px;">
+    <div class="tool-nav"><span>Polypad Workspace (Resize for Sidebar)</span><span onclick="closeTool('draw-tool')" style="cursor:pointer">×</span></div>
+    <iframe src="https://mathigon.org/polypad/embed" width="100%" height="560px" style="border:none;"></iframe>
+</div>
+
+<div id="calc-tool" class="tool-window" style="width:480px; height:450px; top:120px; right:40px;">
+    <div class="tool-nav"><span>Desmos Scientific (IB Approved)</span><span onclick="closeTool('calc-tool')" style="cursor:pointer">×</span></div>
+    <iframe src="https://www.desmos.com/testing/ibmyp/scientific" width="100%" height="410px" style="border:none;"></iframe>
+</div>
+
+<script>
+    let seconds = 7200, running = false;
+
+    function confirmReset() {
+        if(confirm("Return to setup page? Your current progress will be lost.")) {
+            location.reload();
+        }
+    }
+
+    function launch() {
+        const url = document.getElementById('pdf-url').value;
+        if(!url) return alert("Please enter a PDF link.");
+        const t = document.getElementById('timer-input').value.split(':');
+        seconds = (+t[0] * 3600) + (+t[1] * 60) + (+t[2]);
+        document.getElementById('pdf-frame').src = url;
+        document.getElementById('splash-screen').style.display = 'none';
+        running = true; addQ(); startClock();
+    }
+
+    function startClock() {
+        setInterval(() => {
+            if(running && seconds > 0) {
+                seconds--;
+                let h = Math.floor(seconds/3600).toString().padStart(2,'0');
+                let m = Math.floor((seconds%3600)/60).toString().padStart(2,'0');
+                let s = (seconds%60).toString().padStart(2,'0');
+                document.getElementById('timer-txt').innerText = `${h}:${m}:${s}`;
+            }
+        }, 1000);
+    }
+
+    function toggleTimer() { running = !running; document.getElementById('p-btn').innerText = running ? "Pause" : "Resume"; }
+    function toggleLR() { const c = document.getElementById('layout-box'); c.style.flexDirection = (c.style.flexDirection === 'row-reverse') ? 'row' : 'row-reverse'; }
+
+    function addQ() {
+        const id = Date.now();
+        const h = `
+            <div class="q-block" id="block-${id}">
+                <div class="q-header">
+                    <div class="q-print-label"></div>
+                    <div class="q-selector">
+                        <span>Question</span>
+                        <select class="q-main">${Array.from({length:20},(_,i)=>`<option>${i+1}</option>`).join('')}</select>
+                        <select class="q-sub">${'abcdefghijklmnopqrstuvwxyz'.split('').map(l=>`<option>${l}</option>`).join('')}</select>
+                        <select class="q-roman"><option value="">-</option>${['i','ii','iii','iv','v','vi','vii','viii','ix','x'].map(r=>`<option>${r}</option>`).join('')}</select>
+                    </div>
+                    <button class="btn btn-danger" onclick="deleteQ(${id})">Delete</button>
+                </div>
+                <div class="ans-editable" contenteditable="true"></div>
+                <div style="padding:10px; border-top:1px solid #eee;">
+                    <input type="file" accept="image/*" onchange="uploadImg(event, this)"> <span>Upload Working</span>
+                </div>
+            </div>`;
+        $("#q-list").append(h);
+    }
+
+    function deleteQ(id) { if(confirm("Remove this answer box?")) $(`#block-${id}`).remove(); }
+
+    function uploadImg(e, el) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = `<img src="${event.target.result}">`;
+            $(el).closest('.q-block').find('.ans-editable').append(img);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function prepareAndPrint() {
+        $(".q-block").each(function() {
+            const main = $(this).find(".q-main").val();
+            const sub = $(this).find(".q-sub").val();
+            const rom = $(this).find(".q-roman").val();
+            $(this).find(".q-print-label").text("Question " + main + sub + " " + rom);
+        });
+        window.print();
+    }
+
+    function openTool(id) { $(`#${id}`).fadeIn(); }
+    function closeTool(id) { $(`#${id}`).fadeOut(); }
+    $(function() { $(".tool-window").draggable({ handle: ".tool-nav" }).resizable({ handles: "se" }); });
+</script>
+</body>
+</html>
