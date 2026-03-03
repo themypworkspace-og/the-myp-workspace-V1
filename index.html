@@ -105,6 +105,7 @@
             .block-header { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
         }
     </style>
+   
 </head>
 <body>
 
@@ -165,6 +166,7 @@
 </div>
 
 <header>
+    <button class="btn" style="background:rgba(255,255,255,0.2); color:white; font-size:13px; margin-left:5px;" onclick="changePDF()">Change PDF</button>
     <div class="header-box" onclick="location.reload()">The MYP Workspace</div>
     <div class="divider"></div> 
     <button class="btn" style="background:transparent; color:white; font-size:13px;" onclick="toggleLR()">Swap Sides</button>
@@ -236,11 +238,12 @@
         const t = document.getElementById('timer-input').value.split(':');
         seconds = (+t[0] * 3600) + (+t[1] * 60) + (+t[2]);
         
-        if(restore) {
-            $("#q-list").html(localStorage.getItem("myp_workspace_data"));
-            document.getElementById('pdf-frame').src = localStorage.getItem("myp_workspace_pdf") || "";
-            if(localStorage.getItem("myp_draft_enabled") === "true") toggleDraft();
-        } else {
+       if(restore) {
+        $("#q-list").html(localStorage.getItem("myp_workspace_data"));
+        // This line ensures the PDF actually loads on restore:
+        document.getElementById('pdf-frame').src = localStorage.getItem("myp_workspace_pdf") || "";
+        if(localStorage.getItem("myp_draft_enabled") === "true") toggleDraft();
+    } else {
             $("#q-list").empty();
             document.getElementById('pdf-frame').src = url;
         }
@@ -259,7 +262,8 @@
     function saveWork() {
         if(!draftEnabled) return;
         localStorage.setItem("myp_workspace_data", $("#q-list").html());
-        localStorage.setItem("myp_workspace_pdf", document.getElementById('pdf-url').value);
+        // This line saves the current PDF URL to the draft:
+        localStorage.setItem("myp_workspace_pdf", document.getElementById('pdf-frame').src);
     }
 
     function startClock() {
@@ -368,8 +372,18 @@
 
     function openTool(id) { $(`#${id}`).fadeIn(); }
     function closeTool(id) { $(`#${id}`).fadeOut(); }
+    function changePDF() {
+        
+    const newUrl = prompt("Paste new Past Paper PDF URL:");
+        if (newUrl) {
+            document.getElementById('pdf-frame').src = newUrl;
+            // This ensures the new PDF is remembered in the draft
+            if(draftEnabled) localStorage.setItem("myp_workspace_pdf", newUrl);
+        }
+    }
 </script>
 
 </body>
 </html>
+
 
