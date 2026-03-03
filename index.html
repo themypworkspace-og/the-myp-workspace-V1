@@ -297,15 +297,22 @@
     function insertTable() {
         const rows = prompt("Enter number of rows:", "3");
         const cols = prompt("Enter number of columns:", "3");
-        if (!rows || !cols) return;
-        let table = `<table border="1">`;
+        if (!rows || !cols || isNaN(rows) || isNaN(cols)) return;
+
+        // Added explicit inline styles so it survives the PDF conversion perfectly
+        let table = `<table style="border-collapse: collapse; width: 100%; margin: 15px 0; border: 1px solid black;">`;
         for(let i=0; i<rows; i++) {
             table += "<tr>";
-            for(let j=0; j<cols; j++) table += "<td>&nbsp;</td>";
+            for(let j=0; j<cols; j++) {
+                table += `<td style="border: 1px solid black; padding: 10px; min-width: 50px; height: 30px; vertical-align: top;">&nbsp;</td>`;
+            }
             table += "</tr>";
         }
         table += "</table><p>&nbsp;</p>";
+
+        // This command places it exactly where your cursor is blinking
         document.execCommand('insertHTML', false, table);
+        saveWork();
     }
 
     function addQ() {
@@ -365,3 +372,4 @@
 
 </body>
 </html>
+
