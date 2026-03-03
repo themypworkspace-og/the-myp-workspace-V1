@@ -33,7 +33,7 @@
     <link rel="manifest" href="site.webmanifest">
     <link rel="shortcut icon" href="favicon.ico">
 
-    <style>
+ <style>
         :root { 
             --ib-blue: #005a96; 
             --ib-timer-blue: #4db8ff; 
@@ -56,13 +56,13 @@
         .modal-content { background:white; max-width:850px; margin:auto; padding:45px; border-radius:15px; line-height:1.7; position:relative; }
 
         /* WORKSPACE ELEMENTS */
-        header { background: var(--ib-blue); color: white; height: 60px; display: flex; align-items: center; padding: 0 20px; box-sizing: border-box; }
+        header { background: var(--ib-blue); color: white; height: 60px; display: flex; align-items: center; padding: 0 20px; box-sizing: border-box; position: relative; z-index: 9000; }
         .header-box { background: rgba(255,255,255,0.15); padding: 6px 15px; border-radius: 6px; font-weight: bold; font-size: 18px; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
         .divider { width: 1px; height: 30px; background: rgba(255, 255, 255, 0.2); margin: 0 15px; }
         .spacer { flex-grow: 1; }
         .timer-container { background: var(--ib-timer-blue); padding: 6px 15px; border-radius: 5px; font-family: monospace; font-weight: bold; font-size: 18px; margin-right: 10px; }
 
-        .main-container { display: flex; height: calc(100vh - 60px); width: 100%; }
+        .main-container { display: flex; height: calc(100vh - 60px); width: 100%; position: relative; z-index: 1; }
         .pane { height: 100%; flex: 1; position: relative; border-right: 1px solid #ccc; }
         #work-pane { background: #f4f7f9; overflow-y: auto; padding: 30px; box-sizing: border-box; }
 
@@ -80,10 +80,12 @@
         
         .ans-editable { min-height: 180px; padding: 25px; outline: none; background: white; font-size: 16px; line-height: 1.5; }
         .ans-editable img { max-width: 100%; border: 1px solid #ccc; margin-top: 10px; display: block; }
+        .ans-editable table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        .ans-editable td { border: 1px solid #ccc; padding: 8px; min-width: 50px; }
         .block-footer { padding: 8px 15px; background: #fdfdfd; border-top: 1px solid #eee; text-align: right; font-size: 11px; color: #888; display: flex; justify-content: flex-end; gap: 15px; }
 
-        .tool-window { position: absolute; z-index: 5000; background: white; border: 2px solid var(--ib-blue); border-radius: 8px; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
-        .tool-nav { background: var(--ib-blue); color: white; padding: 10px; cursor: move; display: flex; justify-content: space-between; }
+        .tool-window { position: absolute; z-index: 9999; background: white; border: 2px solid var(--ib-blue); border-radius: 8px; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.3); overflow: hidden; }
+        .tool-nav { background: var(--ib-blue); color: white; padding: 10px; cursor: move; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
 
         .btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: 600; transition: 0.2s; }
         .btn-green { background: #28a745; color: white; }
@@ -176,6 +178,7 @@
         <button class="btn" style="background:transparent; color:white;" onclick="openTool('math-tool')">Σ Equations</button>
         <button class="btn" style="background:transparent; color:white;" onclick="openTool('draw-tool')">✎ Drawing</button>
         <button class="btn" style="background:transparent; color:white;" onclick="openTool('calc-tool')">Calc</button>
+        <button class="btn" style="background:transparent; color:white;" onclick="openTool('ptable-tool')">Periodic</button>
         <div class="divider"></div>
         <div class="timer-container" id="timer-txt">02:00:00</div>
         <button class="btn" style="background:#cc0000; color:white;" onclick="toggleTimer()" id="p-btn">Pause</button>
@@ -209,6 +212,11 @@
     <iframe src="https://www.desmos.com/testing/ibmyp/scientific" width="100%" height="410px" style="border:none;"></iframe>
 </div>
 
+<div id="ptable-tool" class="tool-window" style="width:900px; height:600px; top:70px; left:50px;">
+    <div class="tool-nav"><span>Periodic Table</span><span onclick="closeTool('ptable-tool')" style="cursor:pointer">×</span></div>
+    <iframe src="https://ptable.com/?embed" width="100%" height="550px" style="border:none;"></iframe>
+</div>
+
 <script>
     let seconds = 7200, running = false, draftEnabled = false;
 
@@ -217,6 +225,8 @@
         if(localStorage.getItem("myp_workspace_data")) {
             $("#launch-actions").prepend(`<button class="btn" style="background:#6c757d; color:white; padding: 15px 30px; font-size: 18px;" onclick="launch(true)">Restore Draft</button>`);
         }
+        // Fix: Added containment to prevent windows sliding under header
+        $(".tool-window").draggable({ handle: ".tool-nav", containment: "window" }).resizable({ handles: "se" });
     });
 
     function launch(restore) {
@@ -229,7 +239,6 @@
         if(restore) {
             $("#q-list").html(localStorage.getItem("myp_workspace_data"));
             document.getElementById('pdf-frame').src = localStorage.getItem("myp_workspace_pdf") || "";
-            // Restore draft mode status
             if(localStorage.getItem("myp_draft_enabled") === "true") toggleDraft();
         } else {
             $("#q-list").empty();
@@ -285,6 +294,20 @@
         saveWork();
     }
 
+    function insertTable() {
+        const rows = prompt("Enter number of rows:", "3");
+        const cols = prompt("Enter number of columns:", "3");
+        if (!rows || !cols) return;
+        let table = `<table border="1">`;
+        for(let i=0; i<rows; i++) {
+            table += "<tr>";
+            for(let j=0; j<cols; j++) table += "<td>&nbsp;</td>";
+            table += "</tr>";
+        }
+        table += "</table><p>&nbsp;</p>";
+        document.execCommand('insertHTML', false, table);
+    }
+
     function addQ() {
         const id = Date.now();
         $("#q-list").append(`
@@ -313,6 +336,9 @@
                     <div class="tool-group">
                         <button class="t-btn" onclick="document.execCommand('insertUnorderedList')">• List</button>
                     </div>
+                    <div class="tool-group">
+                        <button class="t-btn" onclick="insertTable()">田 Table</button>
+                    </div>
                 </div>
                 <div class="ans-editable" contenteditable="true" oninput="updateCounts(${id}, this); saveWork();"></div>
                 <div class="block-footer">
@@ -335,9 +361,7 @@
 
     function openTool(id) { $(`#${id}`).fadeIn(); }
     function closeTool(id) { $(`#${id}`).fadeOut(); }
-    $(function() { $(".tool-window").draggable({ handle: ".tool-nav" }).resizable({ handles: "se" }); });
 </script>
 
 </body>
 </html>
-
