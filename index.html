@@ -30,7 +30,7 @@
     <link rel="manifest" href="site.webmanifest">
     <link rel="shortcut icon" href="favicon.ico">
 
-     <style>
+    <style>
         :root { 
             --ib-blue: #005a96; 
             --ib-timer-blue: #4db8ff; 
@@ -108,7 +108,7 @@
         <h2 style="color:var(--ib-blue); margin-top:0;">Terms and Conditions & Privacy Policy</h2>
         <p><b>1. Nature of Service:</b> The MYP Workspace is an independent, student-led "Browser Shell." It does not host, store, or distribute copyrighted International Baccalaureate® (IB) materials. All exam papers loaded are provided via external URLs by the end-user.</p>
         <p><b>2. Third-Party Tools & Attribution:</b> This platform integrates third-party educational tools including Desmos and Polypad under their respective embed licenses. The <b>Equation Editor</b> is property of <b>Fountainhead School, Surat</b>. Per the <i>Fair Use</i> doctrine for educational purposes, this tool is utilized with full credit and attribution. This use does not imply endorsement by the school.</p>
-        <p><b>3. Data Privacy & Google Compliance:</b> We do not collect, sell, or store personal user data on any server. We utilize <b>Local Storage</b> only to facilitate the temporary session. We do not use cookies for tracking. In accordance with Google Search Console and global privacy standards, users are informed that all work is processed locally on their own device.</p>
+        <p><b>3. Data Privacy & Google Compliance:</b> We do not collect, sell, or store personal user data on any server. We utilize <b>Local Storage</b> only to facilitate the temporary session and Draft Mode. We do not use cookies for tracking. In accordance with global privacy standards, users are informed that all work is processed locally on their own device.</p>
         <p><b>4. Limitation of Liability:</b> This tool is provided "as is" without warranty of any kind. The developer is not responsible for any technical issues during practice or for any discrepancies between this workspace and the official IB e-Assessment software.</p>
         <p><b>5. Intellectual Property:</b> "MYP" and "International Baccalaureate" are trademarks of the IB Organization. This site is not affiliated with, endorsed by, or connected to the IBO.</p>
         <br>
@@ -127,7 +127,9 @@
         <input type="text" id="pdf-url" placeholder="Enter Past Paper PDF URL..." style="width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
         <div style="display:flex; gap:20px; align-items:center;">
             Set Timer: <input type="text" id="timer-input" value="02:00:00" style="width:110px; text-align:center; padding:10px; border-radius:5px; border:none; font-weight:bold;">
-            <button class="btn btn-green" style="margin-left:auto; padding: 15px 40px; font-size: 18px;" onclick="launch()">Launch Workspace</button>
+            <div id="launch-actions" style="display:flex; gap:10px; margin-left:auto;">
+                <button class="btn btn-green" style="padding: 15px 40px; font-size: 18px;" onclick="launch(false)">Launch Workspace</button>
+            </div>
         </div>
         <p style="font-size: 12px; margin-top: 15px; opacity: 0.8; text-align:center;">By launching, you agree to our <a href="#" style="color:white;" onclick="$('#terms-modal').show()">Terms and Conditions</a></p>
     </div>
@@ -160,7 +162,12 @@
 <header>
     <div class="header-box" onclick="location.reload()">The MYP Workspace</div>
     <div class="divider"></div> 
-    <button class="btn" style="background:transparent; color:white;" onclick="toggleLR()">Swap Sides</button>
+    <button class="btn" style="background:transparent; color:white; font-size:13px;" onclick="toggleLR()">Swap Sides</button>
+    <div class="divider"></div>
+    <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:12px; font-weight:bold;">Autosave Mode:</span>
+        <button id="draft-toggle" class="btn" style="background:#888; color:white; padding:4px 10px; font-size:11px;" onclick="toggleDraft()">OFF</button>
+    </div>
     <div class="spacer"></div> 
     <div style="display:flex; align-items:center;">
         <button class="btn" style="background:transparent; color:white;" onclick="openTool('math-tool')">Σ Equations</button>
@@ -200,17 +207,47 @@
 </div>
 
 <script>
-    let seconds = 7200, running = false;
+    let seconds = 7200, running = false, draftEnabled = false;
 
-    function launch() {
+    // On start, check for existing draft
+    $(document).ready(function() {
+        if(localStorage.getItem("myp_workspace_data")) {
+            $("#launch-actions").prepend(`<button class="btn" style="background:#6c757d; color:white; padding: 15px 30px; font-size: 18px;" onclick="launch(true)">Restore Draft</button>`);
+        }
+    });
+
+    function launch(restore) {
         const url = document.getElementById('pdf-url').value;
-        if(!url) return alert("Please enter a PDF link.");
+        if(!url && !restore) return alert("Please enter a PDF link.");
+        
         const t = document.getElementById('timer-input').value.split(':');
         seconds = (+t[0] * 3600) + (+t[1] * 60) + (+t[2]);
-        document.getElementById('pdf-frame').src = url;
+        
+        if(restore) {
+            $("#q-list").html(localStorage.getItem("myp_workspace_data"));
+            document.getElementById('pdf-frame').src = localStorage.getItem("myp_workspace_pdf") || "";
+            // Restore draft mode status
+            if(localStorage.getItem("myp_draft_enabled") === "true") toggleDraft();
+        } else {
+            $("#q-list").empty();
+            document.getElementById('pdf-frame').src = url;
+        }
+
         document.getElementById('splash-screen').style.display = 'none';
         running = true; startClock();
-        $("#q-list").empty();
+    }
+
+    function toggleDraft() {
+        draftEnabled = !draftEnabled;
+        $("#draft-toggle").text(draftEnabled ? "ON" : "OFF").css("background", draftEnabled ? "#28a745" : "#888");
+        localStorage.setItem("myp_draft_enabled", draftEnabled);
+        if(draftEnabled) saveWork();
+    }
+
+    function saveWork() {
+        if(!draftEnabled) return;
+        localStorage.setItem("myp_workspace_data", $("#q-list").html());
+        localStorage.setItem("myp_workspace_pdf", document.getElementById('pdf-url').value);
     }
 
     function startClock() {
@@ -239,9 +276,10 @@
     function addSnip() {
         const id = Date.now();
         $("#q-list").append(`<div class="q-block" id="block-${id}" style="border: 2px dashed var(--snip-orange); background: #fffaf5;">
-            <div class="block-header" style="background:#fff1e6; color:var(--snip-orange);"><span>✂️ QUESTION SNIP</span><button class="btn btn-danger" onclick="$('#block-${id}').remove();">Remove</button></div>
-            <div class="ans-editable" contenteditable="true" placeholder="Paste image here..."></div>
+            <div class="block-header" style="background:#fff1e6; color:var(--snip-orange);"><span>✂️ QUESTION SNIP</span><button class="btn btn-danger" onclick="$('#block-${id}').remove(); saveWork();">Remove</button></div>
+            <div class="ans-editable" contenteditable="true" oninput="saveWork();" placeholder="Paste image here..."></div>
         </div>`);
+        saveWork();
     }
 
     function addQ() {
@@ -251,9 +289,9 @@
                 <div class="block-header" style="background:#f8f9fa; color:var(--ib-blue);">
                     <div style="display:flex; align-items:center; gap:10px;">
                         <span>📝</span>
-                        <input type="text" class="q-label-input" placeholder="Question # (e.g. 1a)...">
+                        <input type="text" class="q-label-input" placeholder="Question # (e.g. 1a)..." oninput="saveWork()">
                     </div>
-                    <button class="btn btn-danger" onclick="$('#block-${id}').remove();">Delete</button>
+                    <button class="btn btn-danger" onclick="$('#block-${id}').remove(); saveWork();">Delete</button>
                 </div>
                 <div class="toolbar">
                     <div class="tool-group">
@@ -273,7 +311,7 @@
                         <button class="t-btn" onclick="document.execCommand('insertUnorderedList')">• List</button>
                     </div>
                 </div>
-                <div class="ans-editable" contenteditable="true" oninput="updateCounts(${id}, this);"></div>
+                <div class="ans-editable" contenteditable="true" oninput="updateCounts(${id}, this); saveWork();"></div>
                 <div class="block-footer">
                     <span style="color:#666; font-style:italic; margin-right:auto;">Tip: Win+Shift+S to snip, then Ctrl+V to paste here.</span>
                     <span id="word-count-${id}">0 words</span>
@@ -281,6 +319,7 @@
                 </div>
             </div>
         `);
+        saveWork();
     }
 
     function updateCounts(id, element) {
@@ -298,4 +337,3 @@
 
 </body>
 </html>
-    
