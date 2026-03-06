@@ -30,366 +30,804 @@
    <link rel="icon" type="image/png" href="MYPW-icon.png" sizes="32x32">
     <link rel="canonical" href="https://themypworkspace-og.github.io/the-myp-workspace-V1/" />
 
- <style>
-        :root { 
-            --ib-blue: #005a96; 
-            --ib-timer-blue: #4db8ff; 
-            --snip-orange: #e67e22;
-        }
+<style>
+    :root {
+        --ib-blue: #005a96;
+        --ib-timer-blue: #4db8ff;
+        --snip-orange: #e67e22;
+    }
+    body, html { margin:0; padding:0; height:100%; font-family:'Segoe UI',Arial,sans-serif; overflow:hidden; background:white; }
 
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: white; }
+    /* SPLASH */
+    #splash-screen { position:fixed; inset:0; background:#fff; z-index:10000; overflow-y:auto; display:flex; flex-direction:column; align-items:center; padding:40px; }
+    .hero-section { max-width:1100px; width:100%; text-align:center; margin-bottom:20px; }
+    .start-box { width:100%; max-width:1100px; background:var(--ib-blue); color:white; padding:30px; border-radius:12px; margin-bottom:25px; box-sizing:border-box; }
+    .setup-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; max-width:1200px; width:100%; margin-bottom:50px; }
+    .info-card { background:#fff; padding:30px; border-radius:12px; border:1px solid #eee; text-align:left; font-size:14px; line-height:1.6; color:#444; box-shadow:0 10px 30px rgba(0,0,0,0.05); }
+    .info-card h3 { color:var(--ib-blue); border-bottom:2px solid #eee; padding-bottom:12px; margin-top:0; font-size:20px; }
 
-        /* SPLASH SCREEN & GRID */
-        #splash-screen { position: fixed; inset: 0; background: #fff; z-index: 10000; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 40px; }
-        .hero-section { max-width: 1100px; width: 100%; text-align: center; margin-bottom: 20px; }
-        .start-box { width: 100%; max-width: 1100px; background: var(--ib-blue); color: white; padding: 30px; border-radius: 12px; margin-bottom: 25px; box-sizing: border-box; }
-        
-        .setup-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; max-width: 1200px; width: 100%; margin-bottom: 50px;}
-        .info-card { background: #fff; padding: 30px; border-radius: 12px; border: 1px solid #eee; text-align: left; font-size: 14px; line-height: 1.6; color: #444; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .info-card h3 { color: var(--ib-blue); border-bottom: 2px solid #eee; padding-bottom: 12px; margin-top: 0; font-size: 20px; }
+    /* MODALS - styles for inner content boxes */
+    .modal-content { background:white; max-width:850px; margin:auto; padding:45px; border-radius:15px; line-height:1.7; position:relative; }
 
-        /* MODAL STYLE */
-        #terms-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:30000; padding:50px; overflow-y:auto; }
-        .modal-content { background:white; max-width:850px; margin:auto; padding:45px; border-radius:15px; line-height:1.7; position:relative; }
+    /* HEADER */
+    header { background:var(--ib-blue); color:white; height:60px; display:flex; align-items:center; padding:0 20px; box-sizing:border-box; position:relative; z-index:9000; }
+    .header-box { background:rgba(255,255,255,0.15); padding:6px 15px; border-radius:6px; font-weight:bold; font-size:18px; cursor:pointer; border:1px solid rgba(255,255,255,0.3); }
+    .divider { width:1px; height:30px; background:rgba(255,255,255,0.2); margin:0 15px; }
+    .spacer { flex-grow:1; }
+    .timer-container { background:var(--ib-timer-blue); padding:6px 15px; border-radius:5px; font-family:monospace; font-weight:bold; font-size:18px; margin-right:10px; }
 
-        /* WORKSPACE ELEMENTS */
-        header { background: var(--ib-blue); color: white; height: 60px; display: flex; align-items: center; padding: 0 20px; box-sizing: border-box; position: relative; z-index: 9000; }
-        .header-box { background: rgba(255,255,255,0.15); padding: 6px 15px; border-radius: 6px; font-weight: bold; font-size: 18px; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
-        .divider { width: 1px; height: 30px; background: rgba(255, 255, 255, 0.2); margin: 0 15px; }
-        .spacer { flex-grow: 1; }
-        .timer-container { background: var(--ib-timer-blue); padding: 6px 15px; border-radius: 5px; font-family: monospace; font-weight: bold; font-size: 18px; margin-right: 10px; }
+    /* MAIN */
+    .main-container { display:flex; height:calc(100vh - 60px); width:100%; position:relative; z-index:1; }
+    .pane { height:100%; flex:1; position:relative; border-right:1px solid #ccc; }
+    #work-pane { background:#f4f7f9; overflow-y:auto; padding:30px; box-sizing:border-box; }
 
-        .main-container { display: flex; height: calc(100vh - 60px); width: 100%; position: relative; z-index: 1; }
-        .pane { height: 100%; flex: 1; position: relative; border-right: 1px solid #ccc; }
-        #work-pane { background: #f4f7f9; overflow-y: auto; padding: 30px; box-sizing: border-box; }
+    /* BLOCKS */
+    .q-block { border:1px solid #ddd; margin-bottom:25px; border-radius:8px; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,0.05); overflow:hidden; }
+    .block-header { padding:10px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; font-weight:bold; font-size:13px; }
+    .q-label-input { font-family:inherit; font-size:13px; border:1px solid #ddd; border-radius:4px; padding:4px 8px; font-weight:bold; width:220px; outline:none; }
+    .q-label-input:focus { border-color:var(--ib-blue); background:#fffef0; }
+    .toolbar { background:#f1f1f1; padding:8px 15px; border-bottom:1px solid #ddd; display:flex; gap:5px; flex-wrap:wrap; }
+    .tool-group { display:flex; gap:2px; border-right:1px solid #ccc; padding-right:8px; margin-right:4px; }
+    .t-btn { background:#fff; border:1px solid #bbb; padding:4px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:13px; min-width:32px; }
+    .t-btn:hover { background:#e9e9e9; }
+    .ans-editable { min-height:180px; padding:25px; outline:none; background:white; font-size:16px; line-height:1.5; }
+    .ans-editable img { max-width:100%; border:1px solid #ccc; margin-top:10px; display:block; }
+    .ans-editable table { border-collapse:collapse; width:100%; margin:10px 0; }
+    .ans-editable td { border:1px solid #ccc; padding:8px; min-width:50px; }
+    .block-footer { padding:8px 15px; background:#fdfdfd; border-top:1px solid #eee; font-size:11px; color:#888; display:flex; justify-content:flex-end; gap:15px; }
 
-        /* BLOCKS & TOOLBARS */
-        .q-block { border: 1px solid #ddd; margin-bottom: 25px; border-radius: 8px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; }
-        .block-header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; font-weight: bold; font-size: 13px; }
-        
-        .q-label-input { font-family: inherit; font-size: 13px; border: 1px solid #ddd; border-radius: 4px; padding: 4px 8px; font-weight: bold; width: 220px; outline: none; }
-        .q-label-input:focus { border-color: var(--ib-blue); background: #fffef0; }
+    .btn { padding:10px 20px; cursor:pointer; border:none; border-radius:6px; font-weight:600; transition:0.2s; }
+    .btn-green { background:#28a745; color:white; }
+    .btn-danger { background:#dc3545; color:white; font-size:11px; padding:6px 12px; }
 
-        .toolbar { background: #f1f1f1; padding: 8px 15px; border-bottom: 1px solid #ddd; display: flex; gap: 5px; flex-wrap: wrap; }
-        .tool-group { display: flex; gap: 2px; border-right: 1px solid #ccc; padding-right: 8px; margin-right: 4px; }
-        .t-btn { background: #fff; border: 1px solid #bbb; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; min-width: 32px; }
-        .t-btn:hover { background: #e9e9e9; }
-        
-        .ans-editable { min-height: 180px; padding: 25px; outline: none; background: white; font-size: 16px; line-height: 1.5; }
-        .ans-editable img { max-width: 100%; border: 1px solid #ccc; margin-top: 10px; display: block; }
-        .ans-editable table { border-collapse: collapse; width: 100%; margin: 10px 0; }
-        .ans-editable td { border: 1px solid #ccc; padding: 8px; min-width: 50px; }
-        .block-footer { padding: 8px 15px; background: #fdfdfd; border-top: 1px solid #eee; text-align: right; font-size: 11px; color: #888; display: flex; justify-content: flex-end; gap: 15px; }
+    /* INSERT BAR */
+    .tool-window { position:absolute; z-index:9999; background:white; border:2px solid var(--ib-blue); border-radius:8px; display:none; box-shadow:0 10px 40px rgba(0,0,0,0.3); overflow:hidden; }
+    .tool-nav { background:var(--ib-blue); color:white; padding:10px; cursor:move; display:flex; justify-content:space-between; font-weight:bold; font-size:14px; }
+    .insert-bar { background:#f0f5fa; border-top:2px solid var(--ib-blue); padding:8px 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .insert-bar label { font-size:12px; font-weight:600; color:#444; white-space:nowrap; }
+    .insert-bar select { flex:1; min-width:140px; padding:5px 8px; border:1px solid #bbb; border-radius:5px; font-size:12px; font-family:inherit; outline:none; }
+    .insert-bar select:focus { border-color:var(--ib-blue); }
+    .btn-insert { background:var(--ib-blue); color:white; border:none; padding:6px 16px; border-radius:5px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; transition:background 0.2s; }
+    .btn-insert:hover { background:#004070; }
+    .insert-status { font-size:11px; color:#28a745; font-weight:600; display:none; }
 
-        .tool-window { position: absolute; z-index: 9999; background: white; border: 2px solid var(--ib-blue); border-radius: 8px; display: none; box-shadow: 0 10px 40px rgba(0,0,0,0.3); overflow: hidden; }
-        .tool-nav { background: var(--ib-blue); color: white; padding: 10px; cursor: move; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
+    /* TIMES UP */
+    .timesup-box { background:white; border-radius:16px; padding:48px 56px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.4); max-width:420px; width:90%; }
+    .timesup-box h2 { color:#cc0000; font-size:36px; margin:0 0 10px; }
+    .timesup-box p { color:#555; font-size:15px; margin-bottom:28px; }
+    .timesup-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
 
-        .btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; font-weight: 600; transition: 0.2s; }
-        .btn-green { background: #28a745; color: white; }
-        .btn-danger { background: #dc3545; color: white; font-size: 11px; padding: 6px 12px; }
+    /* LOAD MODAL inner styles */
+    .load-modal-content { background:white; max-width:600px; margin:auto; padding:40px; border-radius:15px; }
+    .load-modal-content h3 { color:var(--ib-blue); margin-top:0; }
+    .drop-zone {
+        border:3px dashed #b0c8e0; border-radius:10px; padding:40px 20px;
+        text-align:center; cursor:pointer; transition:all 0.2s;
+        background:#f7fbff; color:#555; font-size:14px; margin-bottom:16px;
+    }
+    .drop-zone:hover, .drop-zone.drag-over { border-color:var(--ib-blue); background:#eaf4ff; }
+    .drop-zone input[type=file] { display:none; }
+    .drop-zone .drop-icon { font-size:36px; display:block; margin-bottom:10px; }
+    #scan-status { font-size:13px; color:var(--ib-blue); font-weight:600; min-height:20px; margin-top:8px; text-align:center; }
 
-        /* ADVANCED PRINT ENGINE */
-        @media print {
-            body, html { overflow: visible !important; height: auto !important; }
-            header, .pane:first-child, .toolbar, .btn, .btn-danger, #splash-screen, .block-footer, #terms-modal { display: none !important; }
-            .main-container { display: block !important; height: auto !important; position: relative !important; }
-            .pane { width: 100% !important; border: none !important; height: auto !important; position: relative !important; overflow: visible !important; }
-            #work-pane { background: white !important; padding: 0 !important; height: auto !important; overflow: visible !important; }
-            .q-block { border: 1px solid #000 !important; margin-bottom: 40px !important; box-shadow: none !important; page-break-inside: avoid !important; break-inside: avoid !important; }
-            .ans-editable { height: auto !important; min-height: 0 !important; overflow: visible !important; }
-            .ans-editable img { max-width: 100% !important; height: auto !important; page-break-inside: avoid !important; }
-            .q-label-input { border: none !important; padding: 0 !important; font-size: 22px !important; color: black !important; background: transparent !important; width: 100% !important; }
-            .block-header { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
-        }
-    </style>
-   
+    @media print {
+        body, html { overflow:visible !important; height:auto !important; }
+        header, .pane:first-child, .toolbar, .btn, .btn-danger, #splash-screen,
+        .block-footer, #terms-modal, .insert-bar, #timesup-overlay,
+        #load-modal, #snip-modal, footer { display:none !important; }
+        .main-container { display:block !important; height:auto !important; }
+        .pane { width:100% !important; border:none !important; height:auto !important; overflow:visible !important; }
+        #work-pane { background:white !important; padding:0 !important; height:auto !important; overflow:visible !important; }
+        .q-block { border:1px solid #000 !important; margin-bottom:40px !important; box-shadow:none !important; page-break-inside:avoid !important; break-inside:avoid !important; }
+        .ans-editable { height:auto !important; min-height:0 !important; overflow:visible !important; }
+        .ans-editable img { max-width:100% !important; height:auto !important; page-break-inside:avoid !important; }
+        .q-label-input { border:none !important; padding:0 !important; font-size:22px !important; color:black !important; background:transparent !important; width:100% !important; }
+        .block-header { background:#f0f0f0 !important; -webkit-print-color-adjust:exact; }
+    }
+</style>
 </head>
 <body>
 
-<div id="terms-modal">
+<!-- TERMS MODAL -->
+<div id="terms-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:30000; padding:50px; overflow-y:auto;">
     <div class="modal-content">
-        <h2 style="color:var(--ib-blue); margin-top:0;">Terms and Conditions & Privacy Policy</h2>
-        <p><b>1. Nature of Service:</b> The MYP Workspace™ is an independent, student-led "Browser Shell." It does not host, store, or distribute copyrighted International Baccalaureate® (IB) materials. All exam papers loaded are provided via external URLs by the end-user.</p>
+        <h2 style="color:var(--ib-blue);margin-top:0;">Terms and Conditions & Privacy Policy</h2>
+       <p><b>1. Nature of Service:</b> The MYP Workspace™ is an independent, student-led "Browser Shell." It does not host, store, or distribute copyrighted International Baccalaureate® (IB) materials. All exam papers loaded are provided via external URLs by the end-user.</p>
         <p><b>2. Third-Party Tools & Attribution:</b> This platform integrates third-party educational tools including Desmos and Polypad under their respective embed licenses. The <b>Equation Editor</b> is property of <b>Fountainhead School, Surat</b>. Per the <i>Fair Use</i> doctrine for educational purposes, this tool is utilized with full credit and attribution.</p>
         <p><b>3. Data Privacy & Google Compliance:</b> We do not collect, sell, or store personal user data on any server. We utilize <b>Local Storage</b> only to facilitate the temporary session and Autosave Mode so the user does not loose progress if accidentally reloaded or closed the page..</p>
         <p><b>4. Limitation of Liability:</b> This tool is provided "as is" without warranty of any kind. The developer is not responsible for any technical issues during practice.</p>
         <p><b>5. Intellectual Property:</b> "MYP" and "International Baccalaureate" are trademarks of the IB Organization. This site is not affiliated with, endorsed by, or connected to the IBO.</p>
         <p><b>6. Usage Tracking:</b> To improve the experience, we use a simple counter to track the total number of "Launches." No personal information, IP addresses, or names are ever recorded.</p>
         <br>
-        <button class="btn" style="background:var(--ib-blue); color:white;" onclick="$('#terms-modal').hide()">I Understand and Agree</button>
+        <button class="btn" style="background:var(--ib-blue);color:white;" onclick="$('#terms-modal').hide()">I Understand and Agree</button>
     </div>
 </div>
 
+<!-- LOAD SESSION MODAL — user uploads their .mws save file -->
+<div id="load-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:30000; padding:50px; overflow-y:auto;">
+    <div class="load-modal-content">
+        <h3>📂 Load Saved Session</h3>
+        <p style="font-size:13px;color:#555;margin-bottom:18px;">
+            Upload the <b>.mws</b> session file that was downloaded when you clicked "Save Session." Your past paper, all answer boxes, and typed content will be fully restored. You can also open the <b>.txt</b> file at any time in Notepad, TextEdit, or any text app to read your answers offline.
+        </p>
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('mws-upload-input').click()">
+            <span class="drop-icon">📄</span>
+            <b>Click to choose your .mws session file</b><br>
+            <span style="font-size:12px;color:#888;">or drag and drop it here</span>
+            <input type="file" id="mws-upload-input" accept=".mws,.txt" onchange="handleMWSUpload(this.files[0])">
+        </div>
+        <div id="scan-status"></div>
+        <div style="margin-top:18px;display:flex;gap:10px;">
+            <button class="btn" style="background:#888;color:white;" onclick="$('#load-modal').hide()">Cancel</button>
+        </div>
+        <p style="font-size:11px;color:#bbb;margin-top:14px;">The .mws file is a plain text file — open it in any text editor to read your answers without needing this website.</p>
+    </div>
+</div>
+
+<!-- TIMES UP OVERLAY -->
+<div id="timesup-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:25000; align-items:center; justify-content:center;">
+    <div class="timesup-box">
+        <h2>⏰ Time's Up!</h2>
+        <p>Your session timer has reached zero. You can save your work or continue with extra time.</p>
+        <div class="timesup-actions">
+            <button class="btn btn-green" onclick="continueSession()">Continue Working</button>
+            <button class="btn" style="background:var(--ib-blue);color:white;" onclick="document.getElementById('timesup-overlay').style.display='none'; saveSession();">💾 Save Everything</button>
+        </div>
+    </div>
+</div>
+
+<!-- SPLASH SCREEN -->
 <div id="splash-screen">
     <div class="hero-section">
-        <h1 style="color: var(--ib-blue); font-size: 48px; margin-bottom: 5px;">The MYP Workspace™</h1>
-        <p style="color: #666; font-size: 18px;">Built by <b>Yogen Jayesh Patel</b> — Elevating Digital Exam Readiness.</p>
+        <h1 style="color:var(--ib-blue);font-size:48px;margin-bottom:5px;">The MYP Workspace™</h1>
+        <p style="color:#666;font-size:18px;">Built by <b>Yogen Jayesh Patel</b> — Elevating Digital Exam Readiness.</p>
+        <div style="display:inline-flex;align-items:center;gap:8px;background:#f0f7ff;border:1px solid #cce0f5;border-radius:20px;padding:6px 18px;margin-top:8px;font-size:14px;color:#555;">
+            <span style="font-size:18px;">👥</span>
+            <span>Total sessions launched: <b id="visit-count" style="color:var(--ib-blue);">...</b></span>
+        </div>
     </div>
 
     <div class="start-box">
         <h3 style="margin-top:0;">Launch Your Session</h3>
-        <input type="text" id="pdf-url" placeholder="Enter Past Paper PDF URL..." style="width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
-        <div style="display:flex; gap:20px; align-items:center;">
-            Set Timer: <input type="text" id="timer-input" value="02:00:00" style="width:110px; text-align:center; padding:10px; border-radius:5px; border:none; font-weight:bold;">
-            <div id="launch-actions" style="display:flex; gap:10px; margin-left:auto;">
-                <button class="btn btn-green" style="padding: 15px 40px; font-size: 18px;" onclick="launch(false)">Launch Workspace</button>
+        <input type="text" id="pdf-url" placeholder="Enter Past Paper PDF URL..." style="width:100%;padding:15px;margin-bottom:15px;border:none;border-radius:8px;font-size:16px;box-sizing:border-box;">
+        <div style="display:flex;gap:20px;align-items:center;">
+            Set Timer: <input type="text" id="timer-input" value="02:00:00" style="width:110px;text-align:center;padding:10px;border-radius:5px;border:none;font-weight:bold;">
+            <div id="launch-actions" style="display:flex;gap:10px;margin-left:auto;">
+                <button class="btn" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:15px 30px;font-size:18px;" onclick="$('#load-modal').show()">📂 Load Session</button>
+                <button class="btn btn-green" style="padding:15px 40px;font-size:18px;" onclick="launch(false)">Launch Workspace</button>
             </div>
         </div>
-        <p style="font-size: 12px; margin-top: 15px; opacity: 0.8; text-align:center;">By launching, you agree to our <a href="#" style="color:white;" onclick="$('#terms-modal').show()">Terms and Conditions</a></p>
+        <p style="font-size:12px;margin-top:15px;opacity:0.8;text-align:center;">By launching, you agree to our <a href="#" style="color:white;" onclick="$('#terms-modal').show()">Terms and Conditions</a></p>
     </div>
 
     <div class="setup-grid">
         <div class="info-card">
             <h3>Detailed Instructions</h3>
-            <p><b>1. Find a Paper:</b> Search for an MYP Past Paper online and copy its URL. Paste it into the blue box above.</p>
+           <p><b>1. Find a Paper:</b> Search for an MYP Past Paper online and copy its URL. Paste it into the blue box above.</p>
             <p><b>2. Set the Pace:</b> Adjust the timer to match the official exam duration (usually 1h 30m or 2h).</p>
             <p><b>3. Use the Tools:</b> Open the Equation Editor for math, Polypad for geometry, and Desmos for calculations.</p>
             <p><b>4. Transfer Work:</b> Since browsers prevent direct drawing inside text boxes, use <b>Win+Shift+S</b> (Windows) or <b>Cmd+Shift+4</b> (Mac) to snip, then click the answer box and <b>Paste (Ctrl+V)</b>.</p>
             <p><b>5. Export:</b> Click "Save as PDF" to generate a professional-looking submission of your work.</p>
+            <p><b>5. Save & Resume:</b> Click "Save Session" to download a <b>.mws</b> file — open it in any text editor to read your answers offline, or upload it here to continue editing. Click "Save as PDF" for a printable copy.</p>
         </div>
-
         <div class="info-card">
             <h3>Our Story</h3>
             <p>My name is <b>Yogen Jayesh Patel</b>. Transitioning from IGCSE to the MYP e-Assessment in Grade 10 was a massive shift. I realized that while we have access to "Formative," we could only use it for teacher-assigned tasks.</p>
             <p>When I wanted to practice past papers independently, I found myself stuck between a PDF and a Google Doc, which feels nothing like the real exam software. I created <b>The MYP Workspace™</b> to provide every student with a realistic, high-fidelity practice environment. This platform is built for students, by a student, to ensure no one enters their finals feeling unfamiliar with the digital tools.</p>
         </div>
-
         <div class="info-card">
             <h3>Support & Feedback</h3>
-            <p>This is a live project. If you find a bug or have a suggestion to make the experience more realistic, please reach out.</p>
+           <p>This is a live project. If you find a bug or have a suggestion to make the experience more realistic, please reach out.</p>
             <p><b>Email:</b> <a href="mailto:the.myp.workspace@gmail.com">the.myp.workspace@gmail.com</a></p>
-            <p style="font-size: 12px; margin-top:25px; color:#888;"><b>Credits:</b> Special attribution to <b>Fountainhead School, Surat</b> for the Equation Editor tool.</p>
+            <p style="font-size:12px;margin-top:25px;color:#888;"><b>Credits:</b> Special attribution to <b>Fountainhead School, Surat</b> for the Equation Editor tool.</p>
         </div>
     </div>
 </div>
 
+<!-- HEADER -->
 <header>
-    <button class="btn" style="background:rgba(255,255,255,0.2); color:white; font-size:13px; margin-left:5px;" onclick="changePDF()">Change PDF</button>
     <div class="header-box" onclick="location.reload()">The MYP Workspace™</div>
-    <div class="divider"></div> 
-    <button class="btn" style="background:transparent; color:white; font-size:13px;" onclick="toggleLR()">Swap Sides</button>
+    <div style="width:10px;"></div>
+    <button class="btn" style="background:rgba(255,255,255,0.2);color:white;font-size:13px;" onclick="changePDF()">Change PDF</button>
     <div class="divider"></div>
-    <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-size:12px; font-weight:bold;">Autosave Mode:</span>
-        <button id="draft-toggle" class="btn" style="background:#888; color:white; padding:4px 10px; font-size:11px;" onclick="toggleDraft()">OFF</button>
+    <button class="btn" style="background:transparent;color:white;font-size:13px;" onclick="toggleLR()">Swap Sides</button>
+    <div class="divider"></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:12px;font-weight:bold;">Autosave Mode:</span>
+        <button id="draft-toggle" class="btn" style="background:#888;color:white;padding:4px 10px;font-size:11px;" onclick="toggleDraft()">OFF</button>
     </div>
-    <div class="spacer"></div> 
-    <div style="display:flex; align-items:center;">
-        <button class="btn" style="background:transparent; color:white;" onclick="openTool('math-tool')">Σ Equations</button>
-        <button class="btn" style="background:transparent; color:white;" onclick="openTool('draw-tool')">✎ Drawing</button>
-        <button class="btn" style="background:transparent; color:white;" onclick="openTool('calc-tool')">Calc</button>
-        <button class="btn" style="background:transparent; color:white;" onclick="openTool('ptable-tool')">Periodic</button>
+    <div class="spacer"></div>
+    <div style="display:flex;align-items:center;">
+        <button class="btn" style="background:transparent;color:white;" onclick="openTool('math-tool')">Σ Equations</button>
+        <button class="btn" style="background:transparent;color:white;" onclick="openTool('draw-tool')">✎ Drawing</button>
+        <button class="btn" style="background:transparent;color:white;" onclick="openTool('calc-tool')">Calc</button>
+        <button class="btn" style="background:transparent;color:white;" onclick="openTool('ptable-tool')">Periodic</button>
         <div class="divider"></div>
         <div class="timer-container" id="timer-txt">02:00:00</div>
-        <button class="btn" style="background:#cc0000; color:white;" onclick="toggleTimer()" id="p-btn">Pause</button>
+        <button class="btn" style="background:#cc0000;color:white;" onclick="toggleTimer()" id="p-btn">Pause</button>
     </div>
 </header>
 
+<!-- MAIN WORKSPACE -->
 <div class="main-container" id="layout-box">
     <div class="pane"><iframe id="pdf-frame" width="100%" height="100%" style="border:none;"></iframe></div>
     <div class="pane" id="work-pane">
         <div id="q-list"></div>
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="btn" style="flex:1; background:var(--snip-orange); color:white;" onclick="addSnip()">+ Add Question Image</button>
-            <button class="btn" style="flex:1; background:var(--ib-blue); color:white;" onclick="addQ()">+ Add Answer Box</button>
+
+        <!--
+            No mws-print-footer needed - session data is in the .mws file now
+        -->
+
+        <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="btn" style="flex:1;background:var(--snip-orange);color:white;" onclick="addSnip()">+ Add Question Image</button>
+            <button class="btn" style="flex:1;background:var(--ib-blue);color:white;" onclick="addQ()">+ Add Answer Box</button>
         </div>
-        <button class="btn btn-green" style="width:100%; padding: 15px; margin-top:15px;" onclick="window.print()">🖨️ Save as PDF</button>
+        <div style="display:flex;gap:10px;margin-top:10px;">
+            <button class="btn btn-green" style="flex:2;padding:15px;" onclick="saveSession()" title="Downloads .mws file to reload later AND opens print dialog for PDF">
+                💾 Save Session — .mws + PDF
+            </button>
+            <button class="btn" style="flex:1;padding:15px;background:#555;color:white;" onclick="window.print()" title="Print or save as PDF only — no .mws file">
+                🖨️ PDF only
+            </button>
+        </div>
+        <p style="font-size:11px;color:#999;margin:6px 0 0;text-align:center;">
+            💾 saves a <b>.mws file</b> (reload session later) <i>and</i> opens PDF &nbsp;·&nbsp; 🖨️ opens PDF only
+        </p>
     </div>
 </div>
 
-<div id="math-tool" class="tool-window" style="width:600px; height:530px; top:80px; left:80px;">
+<!-- TOOL WINDOWS -->
+<div id="math-tool" class="tool-window" style="width:600px;height:530px;top:80px;left:80px;">
     <div class="tool-nav"><span>Equation Editor</span><span onclick="closeTool('math-tool')" style="cursor:pointer">×</span></div>
-    <iframe src="https://nucleus.fountainheadschools.org/PARCC.html" width="100%" height="460px" style="border:none;"></iframe>
+    <iframe id="math-iframe" src="https://nucleus.fountainheadschools.org/PARCC.html" width="100%" height="400px" style="border:none;"></iframe>
+    <div class="insert-bar">
+        <label>📥 Insert into:</label>
+        <select id="math-target"></select>
+        <button class="btn-insert" onclick="triggerInsert('math-iframe','math-target')">📸 Screenshot &amp; Insert</button>
+        <span class="insert-status" id="math-status">✔ Inserted!</span>
+    </div>
 </div>
 
-<div id="draw-tool" class="tool-window" style="width:850px; height:600px; top:40px; left:40px;">
+<div id="draw-tool" class="tool-window" style="width:850px;height:600px;top:40px;left:40px;">
     <div class="tool-nav"><span>Polypad Workspace</span><span onclick="closeTool('draw-tool')" style="cursor:pointer">×</span></div>
-    <iframe src="https://mathigon.org/polypad/embed" width="100%" height="560px" style="border:none;"></iframe>
+    <iframe id="draw-iframe" src="https://mathigon.org/polypad/embed" width="100%" height="470px" style="border:none;"></iframe>
+    <div class="insert-bar">
+        <label>📥 Insert into:</label>
+        <select id="draw-target"></select>
+        <button class="btn-insert" onclick="triggerInsert('draw-iframe','draw-target')">📸 Screenshot &amp; Insert</button>
+        <span class="insert-status" id="draw-status">✔ Inserted!</span>
+    </div>
 </div>
 
-<div id="calc-tool" class="tool-window" style="width:480px; height:450px; top:120px; right:40px;">
+<div id="calc-tool" class="tool-window" style="width:480px;height:450px;top:120px;right:40px;">
     <div class="tool-nav"><span>Desmos Scientific</span><span onclick="closeTool('calc-tool')" style="cursor:pointer">×</span></div>
-    <iframe src="https://www.desmos.com/testing/ibmyp/scientific" width="100%" height="410px" style="border:none;"></iframe>
+    <iframe id="calc-iframe" src="https://www.desmos.com/testing/ibmyp/scientific" width="100%" height="320px" style="border:none;"></iframe>
+    <div class="insert-bar">
+        <label>📥 Insert into:</label>
+        <select id="calc-target"></select>
+        <button class="btn-insert" onclick="triggerInsert('calc-iframe','calc-target')">📸 Screenshot &amp; Insert</button>
+        <span class="insert-status" id="calc-status">✔ Inserted!</span>
+    </div>
 </div>
 
-<div id="ptable-tool" class="tool-window" style="width:900px; height:600px; top:70px; left:50px;">
+<div id="ptable-tool" class="tool-window" style="width:900px;height:600px;top:70px;left:50px;">
     <div class="tool-nav"><span>Periodic Table</span><span onclick="closeTool('ptable-tool')" style="cursor:pointer">×</span></div>
     <iframe src="https://ptable.com/?embed" width="100%" height="550px" style="border:none;"></iframe>
 </div>
 
-<script>
-    let seconds = 7200, running = false, draftEnabled = false;
+<!-- SNIP INSERT MODAL -->
+<div id="snip-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:20000;align-items:center;justify-content:center;">
+    <div style="background:white;padding:32px;border-radius:12px;max-width:420px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.3);">
+        <h3 style="margin:0 0 6px;color:var(--ib-blue);">📋 Paste &amp; Insert Image</h3>
+        <p style="font-size:13px;color:#555;margin-bottom:16px;">Take your snip first (<b>Win+Shift+S</b> / <b>Cmd+Shift+4</b>), then paste below and choose which answer box to insert it into.</p>
+        <div id="snip-paste-zone" contenteditable="true"
+            style="min-height:120px;border:2px dashed #bbb;border-radius:8px;padding:16px;font-size:13px;color:#999;outline:none;margin-bottom:14px;"
+            data-placeholder="Click here, then press Ctrl+V to paste your screenshot…">
+            Click here, then press Ctrl+V to paste your screenshot…
+        </div>
+        <label style="font-size:13px;font-weight:600;color:#333;">Insert into answer box:</label>
+        <select id="snip-target" style="width:100%;margin:8px 0 16px;padding:8px;border:1px solid #bbb;border-radius:6px;font-size:13px;font-family:inherit;outline:none;"></select>
+        <div style="display:flex;gap:10px;">
+            <button class="btn btn-green" style="flex:1;" onclick="insertFromSnipModal()">✔ Insert</button>
+            <button class="btn" style="flex:1;background:#888;color:white;" onclick="closeSnipModal()">Cancel</button>
+        </div>
+    </div>
+</div>
 
-    // On start, check for existing draft
-    $(document).ready(function() {
-        if(localStorage.getItem("myp_workspace_data")) {
-            $("#launch-actions").prepend(`<button class="btn" style="background:#6c757d; color:white; padding: 15px 30px; font-size: 18px;" onclick="launch(true)">Restore Draft</button>`);
-        }
-        // Fix: Added containment to prevent windows sliding under header
-        $(".tool-window").draggable({ handle: ".tool-nav", containment: "window" }).resizable({ handles: "se" });
-    });
+<footer style="position:fixed;bottom:10px;right:20px;z-index:9500;font-family:sans-serif;color:rgba(0,0,0,0.3);font-size:11px;pointer-events:none;">
+    © 2026 Yogen Jayesh Patel. All Rights Reserved. The MYP Workspace™
+</footer>
 
-    function launch(restore) {
-        const url = document.getElementById('pdf-url').value;
-        if(!url && !restore) return alert("Please enter a PDF link.");
-        
-        const t = document.getElementById('timer-input').value.split(':');
-        seconds = (+t[0] * 3600) + (+t[1] * 60) + (+t[2]);
-        
-       if(restore) {
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ─────────────────────────────────────────────
+//  GLOBALS
+// ─────────────────────────────────────────────
+let seconds = 7200, running = false, draftEnabled = false;
+
+$(document).ready(function() {
+    $(".tool-window").draggable({ handle: ".tool-nav", containment: "window" }).resizable({ handles: "se" });
+    const pz = document.getElementById('snip-paste-zone');
+    pz.addEventListener('focus', () => { if(pz.innerText.trim() === pz.dataset.placeholder) { pz.innerText=''; pz.style.color='#333'; } });
+    pz.addEventListener('blur',  () => { if(pz.innerText.trim() === '') { pz.innerText=pz.dataset.placeholder; pz.style.color='#999'; } });
+
+    // Drag-and-drop on drop zone
+    const dz = document.getElementById('drop-zone');
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if(f) handleMWSUpload(f); });
+
+    // ── Visitor counter via CountAPI (free, no signup needed) ──
+    // Displays total number of times Launch has been clicked.
+    // Uses namespace "themypworkspace" + key "launches-v1"
+    // View your count anytime: https://api.countapi.xyz/get/themypworkspace/launches-v1
+    fetch('https://api.countapi.xyz/get/themypworkspace/launches-v1')
+        .then(r => r.json())
+        .then(data => {
+            const el = document.getElementById('visit-count');
+            if(el && data.value != null) el.textContent = Number(data.value).toLocaleString();
+        })
+        .catch(() => {
+            const el = document.getElementById('visit-count');
+            if(el) el.textContent = '—';
+        });
+});
+
+// ─────────────────────────────────────────────
+//  LAUNCH
+// ─────────────────────────────────────────────
+function launch(restore) {
+    const url = document.getElementById('pdf-url').value;
+    if(!url && !restore) return alert("Please enter a PDF link.");
+    const t = document.getElementById('timer-input').value.split(':');
+    seconds = (+t[0]*3600) + (+t[1]*60) + (+t[2]);
+    if(restore) {
         $("#q-list").html(localStorage.getItem("myp_workspace_data"));
-        // This line ensures the PDF actually loads on restore:
         document.getElementById('pdf-frame').src = localStorage.getItem("myp_workspace_pdf") || "";
         if(localStorage.getItem("myp_draft_enabled") === "true") toggleDraft();
     } else {
-            $("#q-list").empty();
-            document.getElementById('pdf-frame').src = url;
+        $("#q-list").empty();
+        document.getElementById('pdf-frame').src = url;
+    }
+    document.getElementById('splash-screen').style.display = 'none';
+    running = true; startClock();
+    // Increment the launch counter (fire-and-forget, won't block launch)
+    fetch('https://api.countapi.xyz/hit/themypworkspace/launches-v1').catch(()=>{});
+}
+
+// ─────────────────────────────────────────────
+//  AUTOSAVE
+// ─────────────────────────────────────────────
+function toggleDraft() {
+    draftEnabled = !draftEnabled;
+    $("#draft-toggle").text(draftEnabled ? "ON" : "OFF").css("background", draftEnabled ? "#28a745" : "#888");
+    localStorage.setItem("myp_draft_enabled", draftEnabled);
+    if(draftEnabled) saveWork();
+}
+
+function saveWork() {
+    if(!draftEnabled) return;
+    localStorage.setItem("myp_workspace_data", $("#q-list").html());
+    localStorage.setItem("myp_workspace_pdf", document.getElementById('pdf-frame').src);
+}
+
+// ─────────────────────────────────────────────
+//  TIMER
+// ─────────────────────────────────────────────
+function startClock() {
+    setInterval(() => {
+        if(running && seconds > 0) {
+            seconds--;
+            const h = Math.floor(seconds/3600).toString().padStart(2,'0');
+            const m = Math.floor((seconds%3600)/60).toString().padStart(2,'0');
+            const s = (seconds%60).toString().padStart(2,'0');
+            document.getElementById('timer-txt').innerText = `${h}:${m}:${s}`;
+        } else if(running && seconds === 0) {
+            running = false;
+            document.getElementById('p-btn').innerText = "Resume";
+            document.getElementById('p-btn').style.background = "#28a745";
+            const ov = document.getElementById('timesup-overlay');
+            ov.style.display = 'flex';
         }
+    }, 1000);
+}
 
-        document.getElementById('splash-screen').style.display = 'none';
-        running = true; startClock();
+function continueSession() {
+    document.getElementById('timesup-overlay').style.display = 'none';
+    seconds = 1800; running = true;
+    document.getElementById('p-btn').innerText = "Pause";
+    document.getElementById('p-btn').style.background = "#cc0000";
+}
+
+function toggleTimer() {
+    running = !running;
+    document.getElementById('p-btn').innerText = running ? "Pause" : "Resume";
+    document.getElementById('p-btn').style.background = running ? "#cc0000" : "#28a745";
+}
+
+function toggleLR() {
+    const c = document.getElementById('layout-box');
+    c.style.flexDirection = (c.style.flexDirection === 'row-reverse') ? 'row' : 'row-reverse';
+}
+
+function changePDF() {
+    const newUrl = prompt("Paste new Past Paper PDF URL:");
+    if(newUrl) {
+        document.getElementById('pdf-frame').src = newUrl;
+        if(draftEnabled) localStorage.setItem("myp_workspace_pdf", newUrl);
     }
+}
 
-    function toggleDraft() {
-        draftEnabled = !draftEnabled;
-        $("#draft-toggle").text(draftEnabled ? "ON" : "OFF").css("background", draftEnabled ? "#28a745" : "#888");
-        localStorage.setItem("myp_draft_enabled", draftEnabled);
-        if(draftEnabled) saveWork();
+// ─────────────────────────────────────────────
+//  BLOCK BUILDERS
+// ─────────────────────────────────────────────
+function addSnip() {
+    const id = Date.now();
+    $("#q-list").append(`<div class="q-block" id="block-${id}" style="border:2px dashed var(--snip-orange);background:#fffaf5;">
+        <div class="block-header" style="background:#fff1e6;color:var(--snip-orange);">
+            <span>✂️ QUESTION SNIP</span>
+            <button class="btn btn-danger" onclick="$('#block-${id}').remove();saveWork();">Remove</button>
+        </div>
+        <div class="ans-editable" contenteditable="true" oninput="saveWork();" placeholder="Paste image here..."></div>
+    </div>`);
+    saveWork();
+}
+
+function insertTable() {
+    const rows = prompt("Enter number of rows:", "3");
+    const cols = prompt("Enter number of columns:", "3");
+    if(!rows || !cols || isNaN(rows) || isNaN(cols)) return;
+    let table = `<table style="border-collapse:collapse;width:100%;margin:15px 0;border:1px solid black;">`;
+    for(let i=0;i<rows;i++) {
+        table += "<tr>";
+        for(let j=0;j<cols;j++) table += `<td style="border:1px solid black;padding:10px;min-width:50px;height:30px;vertical-align:top;">&nbsp;</td>`;
+        table += "</tr>";
     }
+    table += "</table><p>&nbsp;</p>";
+    document.execCommand('insertHTML', false, table);
+    saveWork();
+}
 
-    function saveWork() {
-        if(!draftEnabled) return;
-        localStorage.setItem("myp_workspace_data", $("#q-list").html());
-        // This line saves the current PDF URL to the draft:
-        localStorage.setItem("myp_workspace_pdf", document.getElementById('pdf-frame').src);
-    }
-
-    function startClock() {
-        setInterval(() => {
-            if(running && seconds > 0) {
-                seconds--;
-                let h = Math.floor(seconds/3600).toString().padStart(2,'0');
-                let m = Math.floor((seconds%3600)/60).toString().padStart(2,'0');
-                let s = (seconds%60).toString().padStart(2,'0');
-                document.getElementById('timer-txt').innerText = `${h}:${m}:${s}`;
-            }
-        }, 1000);
-    }
-
-    function toggleTimer() { 
-        running = !running; 
-        document.getElementById('p-btn').innerText = running ? "Pause" : "Resume"; 
-        document.getElementById('p-btn').style.background = running ? "#cc0000" : "#28a745";
-    }
-
-    function toggleLR() { 
-        const c = document.getElementById('layout-box'); 
-        c.style.flexDirection = (c.style.flexDirection === 'row-reverse') ? 'row' : 'row-reverse'; 
-    }
-
-    function addSnip() {
-        const id = Date.now();
-        $("#q-list").append(`<div class="q-block" id="block-${id}" style="border: 2px dashed var(--snip-orange); background: #fffaf5;">
-            <div class="block-header" style="background:#fff1e6; color:var(--snip-orange);"><span>✂️ QUESTION SNIP</span><button class="btn btn-danger" onclick="$('#block-${id}').remove(); saveWork();">Remove</button></div>
-            <div class="ans-editable" contenteditable="true" oninput="saveWork();" placeholder="Paste image here..."></div>
-        </div>`);
-        saveWork();
-    }
-
-    function insertTable() {
-        const rows = prompt("Enter number of rows:", "3");
-        const cols = prompt("Enter number of columns:", "3");
-        if (!rows || !cols || isNaN(rows) || isNaN(cols)) return;
-
-        // Added explicit inline styles so it survives the PDF conversion perfectly
-        let table = `<table style="border-collapse: collapse; width: 100%; margin: 15px 0; border: 1px solid black;">`;
-        for(let i=0; i<rows; i++) {
-            table += "<tr>";
-            for(let j=0; j<cols; j++) {
-                table += `<td style="border: 1px solid black; padding: 10px; min-width: 50px; height: 30px; vertical-align: top;">&nbsp;</td>`;
-            }
-            table += "</tr>";
-        }
-        table += "</table><p>&nbsp;</p>";
-
-        // This command places it exactly where your cursor is blinking
-        document.execCommand('insertHTML', false, table);
-        saveWork();
-    }
-
-    function addQ() {
-        const id = Date.now();
-        $("#q-list").append(`
-            <div class="q-block" id="block-${id}">
-                <div class="block-header" style="background:#f8f9fa; color:var(--ib-blue);">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <span>📝</span>
-                        <input type="text" class="q-label-input" placeholder="Question # (e.g. 1a)..." oninput="saveWork()">
-                    </div>
-                    <button class="btn btn-danger" onclick="$('#block-${id}').remove(); saveWork();">Delete</button>
+function addQ() {
+    const id = Date.now();
+    $("#q-list").append(`
+        <div class="q-block" id="block-${id}">
+            <div class="block-header" style="background:#f8f9fa;color:var(--ib-blue);">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span>📝</span>
+                    <input type="text" class="q-label-input" placeholder="Question # (e.g. 1a)..." oninput="saveWork()">
                 </div>
-                <div class="toolbar">
-                    <div class="tool-group">
-                        <button class="t-btn" title="Undo" onclick="document.execCommand('undo')">↶</button>
-                        <button class="t-btn" title="Redo" onclick="document.execCommand('redo')">↷</button>
-                    </div>
-                    <div class="tool-group">
-                        <button class="t-btn" onclick="document.execCommand('bold')">B</button>
-                        <button class="t-btn" style="font-style:italic;" onclick="document.execCommand('italic')">I</button>
-                        <button class="t-btn" style="text-decoration:underline;" onclick="document.execCommand('underline')">U</button>
-                    </div>
-                    <div class="tool-group">
-                        <button class="t-btn" onclick="document.execCommand('subscript')">x₂</button>
-                        <button class="t-btn" onclick="document.execCommand('superscript')">x²</button>
-                    </div>
-                    <div class="tool-group">
-                        <button class="t-btn" onclick="document.execCommand('insertUnorderedList')">• List</button>
-                    </div>
-                    <div class="tool-group">
-                        <button class="t-btn" onclick="insertTable()">田 Table</button>
-                    </div>
+                <button class="btn btn-danger" onclick="$('#block-${id}').remove();saveWork();">Delete</button>
+            </div>
+            <div class="toolbar">
+                <div class="tool-group">
+                    <button class="t-btn" onclick="document.execCommand('undo')">↶</button>
+                    <button class="t-btn" onclick="document.execCommand('redo')">↷</button>
                 </div>
-                <div class="ans-editable" contenteditable="true" oninput="updateCounts(${id}, this); saveWork();"></div>
-                <div class="block-footer">
-                    <span style="color:#666; font-style:italic; margin-right:auto;">Tip: Win+Shift+S to snip, then Ctrl+V to paste here.</span>
-                    <span id="word-count-${id}">0 words</span>
-                    <span id="char-count-${id}">0 characters</span>
+                <div class="tool-group">
+                    <button class="t-btn" onclick="document.execCommand('bold')">B</button>
+                    <button class="t-btn" style="font-style:italic;" onclick="document.execCommand('italic')">I</button>
+                    <button class="t-btn" style="text-decoration:underline;" onclick="document.execCommand('underline')">U</button>
+                </div>
+                <div class="tool-group">
+                    <button class="t-btn" onclick="document.execCommand('subscript')">x₂</button>
+                    <button class="t-btn" onclick="document.execCommand('superscript')">x²</button>
+                </div>
+                <div class="tool-group">
+                    <button class="t-btn" onclick="document.execCommand('insertUnorderedList')">• List</button>
+                </div>
+                <div class="tool-group">
+                    <button class="t-btn" onclick="insertTable()">田 Table</button>
                 </div>
             </div>
-        `);
-        saveWork();
-    }
+            <div class="ans-editable" contenteditable="true" oninput="updateCounts(${id},this);saveWork();"></div>
+            <div class="block-footer">
+                <span style="color:#666;font-style:italic;margin-right:auto;">Tip: Win+Shift+S to snip, then Ctrl+V to paste here.</span>
+                <span id="word-count-${id}">0 words</span>
+                <span id="char-count-${id}">0 characters</span>
+            </div>
+        </div>`);
+    saveWork();
+}
 
-    function updateCounts(id, element) {
-        const text = element.innerText || "";
-        const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
-        const chars = text.length;
-        $(`#word-count-${id}`).text(`${words} word${words !== 1 ? 's' : ''}`);
-        $(`#char-count-${id}`).text(`${chars} character${chars !== 1 ? 's' : ''}`);
-    }
+function updateCounts(id, el) {
+    const text = el.innerText || "";
+    const words = text.trim().split(/\s+/).filter(w=>w.length>0).length;
+    $(`#word-count-${id}`).text(`${words} word${words!==1?'s':''}`);
+    $(`#char-count-${id}`).text(`${text.length} character${text.length!==1?'s':''}`);
+}
 
-    function openTool(id) { $(`#${id}`).fadeIn(); }
-    function closeTool(id) { $(`#${id}`).fadeOut(); }
-    function changePDF() {
-        
-    const newUrl = prompt("Paste new Past Paper PDF URL:");
-        if (newUrl) {
-            document.getElementById('pdf-frame').src = newUrl;
-            // This ensures the new PDF is remembered in the draft
-            if(draftEnabled) localStorage.setItem("myp_workspace_pdf", newUrl);
+// ─────────────────────────────────────────────
+//  MWS SESSION ENCODE / DECODE
+//
+//  Images are intentionally NOT stored in the restore code.
+//  They print fine in the PDF (visible on paper) but are stripped
+//  from the code to keep it tiny. On restore, image slots are
+//  replaced with a small notice so the user knows to re-paste.
+//  Text, formatting, tables, labels, and structure all restore fully.
+//
+//  Format: MWS:2:url=<b64>&blocks=<b64-JSON>
+// ─────────────────────────────────────────────
+
+function encodeMWS() {
+    const pdfUrl = document.getElementById('pdf-frame').src || '';
+    const blocks = [];
+    document.querySelectorAll('#q-list .q-block').forEach(block => {
+        const labelInput = block.querySelector('.q-label-input');
+        const editable   = block.querySelector('.ans-editable');
+        const isSnip     = block.style.border && block.style.border.includes('dashed');
+        blocks.push({
+            t: isSnip ? 's' : 'a',
+            l: labelInput ? labelInput.value : '',
+            h: editable ? editable.innerHTML : ''   // images kept as-is (base64 inline)
+        });
+    });
+    const urlB64    = btoa(unescape(encodeURIComponent(pdfUrl)));
+    const blocksB64 = btoa(unescape(encodeURIComponent(JSON.stringify(blocks))));
+    return `MWS:2:url=${urlB64}&blocks=${blocksB64}`;
+}
+
+function decodeMWS(code) {
+    try {
+        const inner = code.replace(/^MWS:[12]:/, '');
+        const params = {};
+        inner.split('&').forEach(pair => {
+            const idx = pair.indexOf('=');
+            params[pair.slice(0,idx)] = pair.slice(idx+1);
+        });
+        const pdfUrl = decodeURIComponent(escape(atob(params.url || '')));
+        const blocks = JSON.parse(decodeURIComponent(escape(atob(params.blocks || 'W10='))));
+        return { pdfUrl, blocks };
+    } catch(e) { return null; }
+}
+
+// ─────────────────────────────────────────────
+//  SAVE EVERYTHING
+//  Step 1: Download .mws file (use this to continue editing later)
+//  Step 2: Auto-open print dialog (save as PDF for reading/printing)
+// ─────────────────────────────────────────────
+function saveSession() {
+    const mwsCode = encodeMWS();
+    const pdfUrl  = document.getElementById('pdf-frame').src || '';
+    const dateStr = new Date().toLocaleString();
+    const fileDate = new Date().toISOString().slice(0,10);
+
+    // ── Build human-readable .mws file ──
+    let readable  = '================================================\n';
+    readable     += '  MYP WORKSPACE — SAVED SESSION\n';
+    readable     += '  ' + dateStr + '\n';
+    readable     += '================================================\n\n';
+    readable     += '  📂 TO CONTINUE EDITING: Upload this file at\n';
+    readable     += '     themypworkspace.github.io → "Load Session"\n\n';
+    readable     += '  🖨️  FOR A PRINTABLE COPY: See the PDF that was\n';
+    readable     += '     also saved at the same time as this file.\n\n';
+    readable     += '================================================\n\n';
+    readable     += 'Past Paper URL: ' + pdfUrl + '\n\n';
+    readable     += '------------------------------------------------\n\n';
+
+    document.querySelectorAll('#q-list .q-block').forEach((block, i) => {
+        const labelInput = block.querySelector('.q-label-input');
+        const editable   = block.querySelector('.ans-editable');
+        const isSnip     = block.style.border && block.style.border.includes('dashed');
+        const label      = isSnip ? '[ Question Snip ' + (i+1) + ' ]'
+                                  : (labelInput && labelInput.value.trim() ? labelInput.value.trim() : 'Question ' + (i+1));
+        const rawText = (editable ? editable.innerHTML : '')
+            .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/div>/gi, '\n')
+            .replace(/<img[^>]*>/gi, '[image — visible in the saved PDF]')
+            .replace(/<[^>]+>/g, '')
+            .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&quot;/g,'"')
+            .trim();
+        readable += label + '\n';
+        readable += (rawText || '(no text answer)') + '\n\n';
+        readable += '------------------------------------------------\n\n';
+    });
+
+    readable += '\n================================================\n';
+    readable += '  RESTORE CODE — do not edit below this line\n';
+    readable += '  (images are stored here — file may be large)\n';
+    readable += '================================================\n';
+    readable += mwsCode + '\n';
+
+    // ── Download the .mws file ──
+    const blob = new Blob([readable], { type: 'text/plain;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = 'MYP-Session-' + fileDate + '.mws';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // ── Auto-trigger print dialog after short delay ──
+    // Browser needs a moment after the download trigger before print works reliably
+    setTimeout(() => { window.print(); }, 800);
+}
+
+// ─────────────────────────────────────────────
+//  LOAD SESSION — reads the uploaded .mws file
+//  Plain FileReader — no libraries, works on Mac + Windows + any device
+// ─────────────────────────────────────────────
+function handleMWSUpload(file) {
+    if(!file) return;
+    const statusEl = document.getElementById('scan-status');
+    statusEl.textContent = '🔍 Reading session file…';
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const match = text.match(/MWS:[12]:[^\r\n]+/);
+        if(!match) {
+            statusEl.textContent = '❌ No session code found. Make sure you upload a .mws file saved from The MYP Workspace™.';
+            return;
         }
+        const parsed = decodeMWS(match[0]);
+        if(!parsed) {
+            statusEl.textContent = '❌ Session code is corrupted and could not be read.';
+            return;
+        }
+        statusEl.textContent = '✅ Session found! Restoring…';
+        setTimeout(() => { $('#load-modal').hide(); restoreSession(parsed.pdfUrl, parsed.blocks); }, 500);
+    };
+    reader.onerror = function() { statusEl.textContent = '❌ Could not read the file.'; };
+    reader.readAsText(file);
+}
+
+// ─────────────────────────────────────────────
+//  RESTORE SESSION from decoded blocks
+// ─────────────────────────────────────────────
+function restoreSession(pdfUrl, blocks) {
+    const t = document.getElementById('timer-input').value.split(':');
+    seconds = (+t[0]*3600) + (+t[1]*60) + (+t[2]);
+
+    document.getElementById('splash-screen').style.display = 'none';
+    document.getElementById('pdf-frame').src = pdfUrl;
+    if(pdfUrl) document.getElementById('pdf-url').value = pdfUrl;
+    running = true;
+    startClock();
+
+    $("#q-list").empty();
+    blocks.forEach(b => {
+        // Support both v1 format (type/label/html) and v2 format (t/l/h)
+        const type  = b.t || b.type;
+        const label = b.l !== undefined ? b.l : (b.label || '');
+        const html  = b.h !== undefined ? b.h : (b.html || '');
+
+        if(type === 's' || type === 'snip') {
+            const id = 'block-' + Date.now() + Math.floor(Math.random()*9999);
+            $("#q-list").append(`<div class="q-block" id="${id}" style="border:2px dashed var(--snip-orange);background:#fffaf5;">
+                <div class="block-header" style="background:#fff1e6;color:var(--snip-orange);">
+                    <span>✂️ QUESTION SNIP</span>
+                    <button class="btn btn-danger" onclick="$('#${id}').remove();saveWork();">Remove</button>
+                </div>
+                <div class="ans-editable" contenteditable="true" oninput="saveWork();">${html}</div>
+            </div>`);
+        } else {
+            const numId = Date.now() + Math.floor(Math.random()*99999);
+            const safeLabel = label.replace(/"/g,'&quot;');
+            $("#q-list").append(`
+                <div class="q-block" id="block-${numId}">
+                    <div class="block-header" style="background:#f8f9fa;color:var(--ib-blue);">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <span>📝</span>
+                            <input type="text" class="q-label-input" placeholder="Question # (e.g. 1a)..." value="${safeLabel}" oninput="saveWork()">
+                        </div>
+                        <button class="btn btn-danger" onclick="$('#block-${numId}').remove();saveWork();">Delete</button>
+                    </div>
+                    <div class="toolbar">
+                        <div class="tool-group">
+                            <button class="t-btn" onclick="document.execCommand('undo')">↶</button>
+                            <button class="t-btn" onclick="document.execCommand('redo')">↷</button>
+                        </div>
+                        <div class="tool-group">
+                            <button class="t-btn" onclick="document.execCommand('bold')">B</button>
+                            <button class="t-btn" style="font-style:italic;" onclick="document.execCommand('italic')">I</button>
+                            <button class="t-btn" style="text-decoration:underline;" onclick="document.execCommand('underline')">U</button>
+                        </div>
+                        <div class="tool-group">
+                            <button class="t-btn" onclick="document.execCommand('subscript')">x₂</button>
+                            <button class="t-btn" onclick="document.execCommand('superscript')">x²</button>
+                        </div>
+                        <div class="tool-group">
+                            <button class="t-btn" onclick="document.execCommand('insertUnorderedList')">• List</button>
+                        </div>
+                        <div class="tool-group">
+                            <button class="t-btn" onclick="insertTable()">田 Table</button>
+                        </div>
+                    </div>
+                    <div class="ans-editable" contenteditable="true" oninput="updateCounts(${numId},this);saveWork();">${html}</div>
+                    <div class="block-footer">
+                        <span style="color:#666;font-style:italic;margin-right:auto;">Tip: Win+Shift+S to snip, then Ctrl+V to paste here.</span>
+                        <span id="word-count-${numId}">0 words</span>
+                        <span id="char-count-${numId}">0 characters</span>
+                    </div>
+                </div>`);
+        }
+    });
+}
+
+// ─────────────────────────────────────────────
+//  INSERT FEATURE
+// ─────────────────────────────────────────────
+function refreshTargetDropdowns() {
+    ['math-target','draw-target','calc-target','snip-target'].forEach(selId => {
+        const sel = document.getElementById(selId);
+        if(!sel) return;
+        const prev = sel.value;
+        sel.innerHTML = '';
+        const blocks = document.querySelectorAll('#q-list .q-block');
+        if(blocks.length === 0) { sel.innerHTML='<option value="">— No answer boxes yet —</option>'; return; }
+        blocks.forEach(block => {
+            const opt = document.createElement('option');
+            opt.value = block.id;
+            const li = block.querySelector('.q-label-input');
+            const sl = block.querySelector('.block-header span');
+            opt.text = li ? (li.value.trim() || '(Untitled)') : (sl ? sl.innerText : block.id);
+            sel.appendChild(opt);
+        });
+        if(prev && sel.querySelector(`option[value="${prev}"]`)) sel.value = prev;
+    });
+}
+
+function openTool(id) { $(`#${id}`).fadeIn(); refreshTargetDropdowns(); }
+function closeTool(id) { $(`#${id}`).fadeOut(); }
+
+function triggerInsert(iframeId, selectId) {
+    const sel = document.getElementById(selectId);
+    const targetId = sel ? sel.value : '';
+    if(!targetId) return alert("Please add an answer box first.");
+    const editable = document.querySelector(`#${targetId} .ans-editable`);
+    if(!editable) return alert("Could not find the selected answer box.");
+    const iframeEl = document.getElementById(iframeId);
+    if(!iframeEl) return;
+    const statusEl = document.getElementById(selectId.replace('-target','-status'));
+    if(statusEl) { statusEl.style.display='inline'; statusEl.textContent='⏳ Capturing…'; }
+    html2canvas(iframeEl, { useCORS:true, allowTaint:true, scale:1.5, logging:false })
+        .then(canvas => {
+            const img = `<img src="${canvas.toDataURL('image/png')}" style="max-width:100%;border:1px solid #ccc;margin-top:8px;display:block;">`;
+            editable.focus();
+            document.execCommand('insertHTML', false, img);
+            saveWork();
+            if(statusEl) { statusEl.textContent='✔ Inserted!'; setTimeout(()=>{statusEl.style.display='none';},2500); }
+        })
+        .catch(() => {
+            if(statusEl) statusEl.style.display='none';
+            openSnipModal(null, targetId);
+            alert("Auto-screenshot blocked by browser (cross-origin). Please use the Paste method.");
+        });
+}
+
+function openSnipModal(autoId, fallbackId) {
+    refreshTargetDropdowns();
+    document.getElementById('snip-modal').style.display = 'flex';
+    const pz = document.getElementById('snip-paste-zone');
+    pz.innerHTML=''; pz.style.color='#999'; pz.innerText=pz.dataset.placeholder;
+    const targetId = autoId || fallbackId;
+    if(targetId) {
+        const sel = document.getElementById('snip-target');
+        if(sel && sel.querySelector(`option[value="block-${targetId}"]`)) sel.value=`block-${targetId}`;
+        else if(sel && sel.querySelector(`option[value="${targetId}"]`)) sel.value=targetId;
     }
+}
+
+function closeSnipModal() { document.getElementById('snip-modal').style.display='none'; }
+
+function insertFromSnipModal() {
+    const sel = document.getElementById('snip-target');
+    const targetId = sel ? sel.value : '';
+    if(!targetId) return alert("Please add an answer box first.");
+    const editable = document.querySelector(`#${targetId} .ans-editable`);
+    if(!editable) return alert("Could not find the selected answer box.");
+    const pz = document.getElementById('snip-paste-zone');
+    const img = pz.querySelector('img');
+    if(!img) return alert("No image found. Please paste a screenshot first.");
+    const clone = img.cloneNode(true);
+    clone.style.cssText = 'max-width:100%;border:1px solid #ccc;margin-top:8px;display:block;';
+    editable.focus();
+    document.execCommand('insertHTML', false, clone.outerHTML);
+    saveWork();
+    closeSnipModal();
+}
+
+// Lazy-load html2canvas
+(function(){ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; document.head.appendChild(s); })();
 </script>
-<img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fthemypworkspace-og.github.io%2Fthe-myp-workspace-V1%2F&label=&icon=book&color=%230d6efd&message=&style=flat&tz=Asia%2FKolkata"> 
-<footer style="position: fixed; bottom: 10px; right: 20px; z-index: 10001; font-family: sans-serif; color: rgba(0, 0, 0, 0.3); font-size: 11px; pointer-events: none;">
-    © 2026 Yogen Jayesh Patel. All Rights Reserved. The MYP Workspace™
-</footer>
 </body>
 </html>
-
-
-
-
-
-
-
