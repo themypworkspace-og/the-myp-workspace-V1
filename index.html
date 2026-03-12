@@ -124,6 +124,114 @@
         .q-label-input { border:none !important; padding:0 !important; font-size:22px !important; color:black !important; background:transparent !important; width:100% !important; }
         .block-header { background:#f0f0f0 !important; -webkit-print-color-adjust:exact; }
     }
+
+    /* ═══════════════════════════════════════════
+       TABLET & MOBILE RESPONSIVE  (≤ 900px)
+    ═══════════════════════════════════════════ */
+
+    /* Tablet pane tab switcher — shown only on small screens */
+    #pane-tabs { display:none; }
+
+    @media (max-width: 900px) {
+
+        /* ── Splash screen ── */
+        #splash-screen { padding:20px 16px; }
+        .hero-section h1 { font-size:32px !important; }
+        .hero-section p  { font-size:15px !important; }
+        .start-box { padding:20px 16px; }
+        .start-box h3 { font-size:16px; }
+        #pdf-url { font-size:14px !important; padding:12px !important; }
+        #launch-actions { flex-direction:column; width:100%; margin-left:0 !important; gap:8px !important; }
+        #launch-actions .btn { width:100%; text-align:center; font-size:16px !important; padding:14px !important; }
+        .setup-grid { grid-template-columns:1fr; gap:14px; }
+        .info-card { padding:20px; }
+
+        /* ── Header ── */
+        header { height:auto; min-height:56px; flex-wrap:wrap; padding:8px 12px; gap:6px; }
+        .header-box { font-size:14px; padding:5px 10px; }
+        /* Hide text labels on small screens, keep icons/timer */
+        .header-label { display:none; }
+        header .divider { display:none; }
+        header .spacer { display:none; }
+        /* Autosave section */
+        header > div:nth-child(5) span { display:none; } /* hide "Autosave Mode:" label */
+        /* Tools row wraps below brand row */
+        header > div:last-child { width:100%; justify-content:space-between; overflow-x:auto; padding-bottom:4px; }
+        .timer-container { font-size:15px; padding:5px 10px; }
+        header .btn { padding:6px 10px; font-size:12px; }
+
+        /* ── Main workspace: stack panes vertically with tab switcher ── */
+        .main-container { flex-direction:column; height:auto; }
+        .pane { height:50vh; flex:none; width:100% !important; border-right:none; border-bottom:1px solid #ccc; }
+        #work-pane { height:auto; min-height:50vh; padding:16px; }
+
+        /* Tab switcher bar */
+        #pane-tabs {
+            display:flex;
+            background:var(--ib-blue);
+            position:sticky; top:0; z-index:8000;
+        }
+        #pane-tabs button {
+            flex:1; padding:12px; border:none; background:transparent;
+            color:rgba(255,255,255,0.65); font-size:14px; font-weight:600;
+            cursor:pointer; border-bottom:3px solid transparent; transition:0.2s;
+        }
+        #pane-tabs button.active {
+            color:white; border-bottom-color:white; background:rgba(255,255,255,0.1);
+        }
+        /* Hide/show panes based on active tab */
+        .pane.tab-hidden { display:none !important; }
+
+        /* ── Blocks ── */
+        .ans-editable { min-height:120px; padding:16px; font-size:15px; }
+        .q-label-input { width:100%; max-width:100%; box-sizing:border-box; }
+        .block-header { flex-wrap:wrap; gap:8px; }
+        .toolbar { gap:4px; }
+        .t-btn { padding:6px 10px; font-size:13px; min-width:36px; min-height:36px; }
+
+        /* ── Bigger tap targets for all buttons ── */
+        .btn { min-height:44px; }
+        .btn-danger { min-height:36px; }
+
+        /* ── Tool windows: full-screen on tablet ── */
+        .tool-window {
+            position:fixed !important;
+            inset:0 !important;
+            width:100% !important;
+            height:100% !important;
+            border-radius:0 !important;
+            z-index:15000 !important;
+        }
+        .tool-window iframe { height:calc(100% - 100px) !important; width:100% !important; }
+
+        /* ── Modals: full width ── */
+        .modal-content { padding:24px 16px; }
+        .load-modal-content { padding:24px 16px; margin:16px; }
+        #terms-modal, #load-modal { padding:16px; }
+
+        /* ── Timer restore modal ── */
+        #timer-restore-modal > div { padding:28px 20px; }
+
+        /* ── Timesup box ── */
+        .timesup-box { padding:32px 24px; }
+        .timesup-box h2 { font-size:28px; }
+
+        /* ── Save buttons ── */
+        #work-pane > div:nth-last-child(3),
+        #work-pane > div:nth-last-child(2) { flex-direction:column; }
+
+        /* ── Footer hidden on mobile (saves space) ── */
+        footer { display:none !important; }
+    }
+
+    @media (max-width: 480px) {
+        .hero-section h1 { font-size:26px !important; }
+        #splash-screen { padding:14px 12px; }
+        .start-box { padding:16px 12px; }
+        .setup-grid { gap:10px; }
+        header .btn { font-size:11px; padding:5px 7px; }
+        .timer-container { font-size:14px; }
+    }
 </style>
 </head>
 <body>
@@ -172,6 +280,28 @@
         <div class="timesup-actions">
             <button class="btn btn-green" onclick="continueSession()">Continue Working</button>
             <button class="btn" style="background:var(--ib-blue);color:white;" onclick="document.getElementById('timesup-overlay').style.display='none'; saveSession();">💾 Save Everything</button>
+        </div>
+    </div>
+</div>
+
+<!-- TIMER RESTORE MODAL — shown when loading a saved session -->
+<div id="timer-restore-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:35000; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:16px; padding:40px 48px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.4); text-align:center;">
+        <div style="font-size:36px; margin-bottom:10px;">⏱️</div>
+        <h3 style="color:var(--ib-blue); margin:0 0 8px;">Restore Timer?</h3>
+        <p style="color:#555; font-size:14px; margin-bottom:6px;">This session was saved with <b id="saved-time-display" style="color:var(--ib-blue);"></b> remaining.</p>
+        <p style="color:#888; font-size:13px; margin-bottom:24px;">Would you like to continue from where you left off, or set a new timer?</p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <button class="btn btn-green" style="width:100%; padding:14px; font-size:15px;" onclick="confirmTimerRestore(true)">
+                ▶ Resume with <span id="saved-time-btn"></span> remaining
+            </button>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" id="new-timer-input" placeholder="HH:MM:SS" value="02:00:00"
+                    style="flex:1; padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px; text-align:center; font-weight:bold; outline:none;">
+                <button class="btn" style="background:var(--ib-blue); color:white; padding:10px 18px; white-space:nowrap;" onclick="confirmTimerRestore(false)">
+                    Set New Timer
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -248,6 +378,12 @@
     </div>
 </header>
 
+<!-- TABLET PANE TABS (visible only on small screens) -->
+<div id="pane-tabs">
+    <button class="active" onclick="switchPane('pdf')">📄 Question Paper</button>
+    <button onclick="switchPane('work')">✏️ My Answers</button>
+</div>
+
 <!-- MAIN WORKSPACE -->
 <div class="main-container" id="layout-box">
     <div class="pane"><iframe id="pdf-frame" width="100%" height="100%" style="border:none;"></iframe></div>
@@ -263,14 +399,14 @@
             <button class="btn" style="flex:1;background:var(--ib-blue);color:white;" onclick="addQ()">+ Add Answer Box</button>
         </div>
         <div style="display:flex;gap:10px;margin-top:10px;">
-            <button class="btn btn-green" style="flex:2;padding:15px;" onclick="saveSession()" title="Downloads .mws file to reload later AND opens print dialog for PDF">
-                💾 Save Session — .mws + PDF
+            <button class="btn btn-green" style="flex:2;padding:15px;" onclick="saveSession()" title="Downloads .mws file to reload later AND saves your answers">
+                💾 <span id="save-btn-label">Save Session — .mws + PDF</span>
             </button>
-            <button class="btn" style="flex:1;padding:15px;background:#555;color:white;" onclick="window.print()" title="Print or save as PDF only — no .mws file">
-                🖨️ PDF only
+            <button id="pdf-only-btn" class="btn" style="flex:1;padding:15px;background:#555;color:white;" onclick="window.print()" title="Print or save as PDF only — no .mws file">
+                🖨️ <span id="pdf-btn-label">PDF only</span>
             </button>
         </div>
-        <p style="font-size:11px;color:#999;margin:6px 0 0;text-align:center;">
+        <p id="save-hint" style="font-size:11px;color:#999;margin:6px 0 0;text-align:center;">
             💾 saves a <b>.mws file</b> (reload session later) <i>and</i> opens PDF &nbsp;·&nbsp; 🖨️ opens PDF only
         </p>
     </div>
@@ -288,13 +424,45 @@
     </div>
 </div>
 
-<div id="draw-tool" class="tool-window" style="width:850px;height:600px;top:40px;left:40px;">
-    <div class="tool-nav"><span>Polypad Workspace</span><span onclick="closeTool('draw-tool')" style="cursor:pointer">×</span></div>
-    <iframe id="draw-iframe" src="https://mathigon.org/polypad/embed" width="100%" height="470px" style="border:none;"></iframe>
+<div id="draw-tool" class="tool-window" style="width:960px;height:700px;top:40px;left:40px;">
+    <!-- Title bar with tab switcher built in -->
+    <div class="tool-nav" style="padding:0 10px 0 0;gap:0;overflow:hidden;">
+        <div style="display:flex;align-items:stretch;height:100%;">
+            <button id="draw-tab-mydraw" onclick="switchDrawTab('mydraw')"
+                style="height:100%;padding:0 20px;background:rgba(255,255,255,0.25);color:white;border:none;border-right:1px solid rgba(255,255,255,0.2);font-weight:bold;font-size:14px;cursor:pointer;transition:background .15s;white-space:nowrap;">
+                ✏️ Drawing Tool
+            </button>
+            <button id="draw-tab-polypad" onclick="switchDrawTab('polypad')"
+                style="height:100%;padding:0 20px;background:transparent;color:rgba(255,255,255,0.65);border:none;border-right:1px solid rgba(255,255,255,0.2);font-weight:600;font-size:14px;cursor:pointer;transition:background .15s;white-space:nowrap;">
+                🔷 Polypad
+            </button>
+        </div>
+        <span style="flex:1;"></span>
+        <span onclick="closeTool('draw-tool')" style="cursor:pointer;font-size:20px;padding:0 14px;display:flex;align-items:center;opacity:0.7;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">×</span>
+    </div>
+
+    <!-- MYP DRAWING TOOL PANE — default tab -->
+    <div id="draw-pane-mydraw" style="display:block;height:615px;position:relative;">
+        <iframe id="mydraw-iframe" src="" width="100%" height="100%" style="border:none;display:block;" allowtransparency="true"></iframe>
+        <div id="mydraw-placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1d23;gap:14px;">
+            <div style="font-size:48px;">✏️</div>
+            <p style="color:#7a8499;font-size:14px;margin:0;text-align:center;font-family:sans-serif;">Loading Drawing Tool…</p>
+        </div>
+    </div>
+
+    <!-- POLYPAD PANE -->
+    <div id="draw-pane-polypad" style="display:none;height:615px;">
+        <iframe id="draw-iframe" src="https://mathigon.org/polypad/embed" width="100%" height="100%" style="border:none;display:block;"></iframe>
+    </div>
+
+    <!-- INSERT BAR (shared — switches buttons by active tab) -->
     <div class="insert-bar">
         <label>📥 Insert into:</label>
         <select id="draw-target"></select>
-        <button class="btn-insert" onclick="triggerInsert('draw-iframe','draw-target')">📸 Screenshot &amp; Insert</button>
+        <!-- Drawing Tool: uses postMessage — shown by default -->
+        <button id="draw-insert-mydraw" class="btn-insert" style="background:#28a745;" onclick="triggerDrawingToolInsert()">➕ Insert Drawing into Answer Box</button>
+        <!-- Polypad: screenshot -->
+        <button id="draw-insert-polypad" class="btn-insert" style="display:none;" onclick="triggerInsert('draw-iframe','draw-target')">📸 Screenshot &amp; Insert</button>
         <span class="insert-status" id="draw-status">✔ Inserted!</span>
     </div>
 </div>
@@ -449,12 +617,110 @@ function toggleLR() {
     c.style.flexDirection = (c.style.flexDirection === 'row-reverse') ? 'row' : 'row-reverse';
 }
 
-function changePDF() {
-    const newUrl = prompt("Paste new Past Paper PDF URL:");
-    if(newUrl) {
-        document.getElementById('pdf-frame').src = newUrl;
-        if(draftEnabled) localStorage.setItem("myp_workspace_pdf", newUrl);
+// ─────────────────────────────────────────────
+//  DRAWING TOOL TAB SWITCHER
+//  Switches the draw-tool window between Polypad
+//  and the integrated MYP Drawing Tool.
+// ─────────────────────────────────────────────
+let _drawingToolLoaded = false;
+let _drawingBlobURL = null; // pre-built at idle time so tab switch is instant
+
+// Pre-warm: build the blob URL in the background ~3s after page load
+// so that when the user clicks "Drawing Tool" it loads instantly
+function _prewarmDrawingTool() {
+    if(_drawingBlobURL) return;
+    try {
+        const src  = getDrawingToolSrc();
+        const blob = new Blob([src], { type: 'text/html' });
+        _drawingBlobURL = URL.createObjectURL(blob);
+    } catch(e) { /* non-fatal */ }
+}
+// Fire after 3 seconds of idle — doesn't block anything
+setTimeout(_prewarmDrawingTool, 3000);
+
+function switchDrawTab(which) {
+    const polyPane  = document.getElementById('draw-pane-polypad');
+    const myPane    = document.getElementById('draw-pane-mydraw');
+    const btnPoly   = document.getElementById('draw-tab-polypad');
+    const btnMy     = document.getElementById('draw-tab-mydraw');
+    const insPolypad= document.getElementById('draw-insert-polypad');
+    const insMydraw = document.getElementById('draw-insert-mydraw');
+
+    if(which === 'polypad') {
+        polyPane.style.display = 'block';
+        myPane.style.display   = 'none';
+        btnPoly.style.background = 'rgba(255,255,255,0.25)';
+        btnPoly.style.color      = 'white';
+        btnMy.style.background   = 'transparent';
+        btnMy.style.color        = 'rgba(255,255,255,0.7)';
+        insPolypad.style.display = 'inline-block';
+        insMydraw.style.display  = 'none';
+    } else {
+        polyPane.style.display = 'none';
+        myPane.style.display   = 'block';
+        btnMy.style.background   = 'rgba(255,255,255,0.25)';
+        btnMy.style.color        = 'white';
+        btnPoly.style.background = 'transparent';
+        btnPoly.style.color      = 'rgba(255,255,255,0.7)';
+        insPolypad.style.display = 'none';
+        insMydraw.style.display  = 'inline-block';
+        if(!_drawingToolLoaded) { loadDrawingTool(); }
     }
+}
+
+function loadDrawingTool() {
+    _drawingToolLoaded = true;
+    const placeholder = document.getElementById('mydraw-placeholder');
+    const iframe      = document.getElementById('mydraw-iframe');
+
+    // Use pre-warmed blob URL if ready, otherwise build it now
+    const url = _drawingBlobURL || (() => {
+        const blob = new Blob([getDrawingToolSrc()], { type: 'text/html' });
+        return URL.createObjectURL(blob);
+    })();
+    iframe.src = url;
+    iframe.onload = () => { if(placeholder) placeholder.style.display = 'none'; };
+}
+
+// ── Handle "Insert Drawing" button ─────────────
+// The drawing tool iframe calls insertToQuestion() which posts a message up.
+// We listen for it here and paste the image into the selected answer box.
+window.addEventListener('message', function(e) {
+    if(!e.data || e.data.type !== 'myp-drawing-insert') return;
+    const dataURL = e.data.dataURL;
+    if(!dataURL) return;
+
+    const sel = document.getElementById('draw-target');
+    const targetId = sel ? sel.value : '';
+    if(!targetId) { alert('Please select an answer box in the Drawing Tool insert bar first.'); return; }
+    const editable = document.querySelector(`#${targetId} .ans-editable`);
+    if(!editable) return;
+
+    const img = `<img src="${dataURL}" style="max-width:100%;border:1px solid #ccc;margin-top:8px;display:block;" alt="Drawing">`;
+    editable.focus();
+    document.execCommand('insertHTML', false, img);
+    saveWork();
+
+    const status = document.getElementById('draw-status');
+    if(status) { status.style.display='inline'; status.textContent='✔ Drawing Inserted!'; setTimeout(()=>status.style.display='none', 2500); }
+});
+
+// ── When user clicks "Insert Drawing" manually ──
+function triggerDrawingToolInsert() {
+    // Tell the iframe to fire its insertToQuestion() function
+    const iframe = document.getElementById('mydraw-iframe');
+    if(iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'myp-request-insert' }, '*');
+    }
+}
+
+// ─────────────────────────────────────────────
+//  DRAWING TOOL SOURCE (inline, no external file)
+//  Stored as a function so it doesn't bloat the
+//  initial parse — only built when first needed.
+// ─────────────────────────────────────────────
+function getDrawingToolSrc() {
+return "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>MYP Drawing Tool<\/title>\n\n<style>\n:root{--bg:#1a1d23;--panel:#22262e;--panel2:#2a2f3a;--border:#363c4a;\n  --blue:#3b9eff;--bd:#1e4f7a;--green:#3ddc84;--red:#ff5f57;--text:#e8eaf0;--muted:#7a8499;}\n*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}\nbody{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);height:100vh;\n  display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased;}\n\n/* TOPBAR */\n#tb{height:46px;background:var(--panel);border-bottom:1px solid var(--border);display:flex;\n  align-items:center;padding:0 10px;gap:2px;flex-shrink:0;z-index:50;}\n.brand{font-size:13px;font-weight:700;color:var(--blue);margin-right:6px;white-space:nowrap;}\n.sp{width:1px;height:22px;background:var(--border);margin:0 4px;flex-shrink:0;}\n.tsp{flex:1;}\n.b{height:28px;padding:0 8px;border:1px solid transparent;border-radius:5px;background:transparent;\n  color:var(--muted);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:500;cursor:pointer;\n  display:flex;align-items:center;gap:3px;transition:all .12s;white-space:nowrap;flex-shrink:0;}\n.b:hover{background:var(--panel2);color:var(--text);border-color:var(--border);}\n.b.active{background:var(--bd);color:var(--blue);border-color:var(--blue);}\n#ins-btn{height:28px;padding:0 12px;border:none;border-radius:5px;\n  background:linear-gradient(135deg,#28a745,#20c060);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;\n  font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .12s;}\n#ins-btn:hover{opacity:.85;}\n\n/* BODY */\n#body{display:flex;flex:1;overflow:hidden;}\n\n/* SIDEBAR */\n#sb{width:190px;background:var(--panel);border-right:1px solid var(--border);\n  display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}\n#tabs{display:flex;background:var(--panel2);border-bottom:1px solid var(--border);flex-shrink:0;}\n.tab{flex:1;padding:6px 2px;border:none;background:transparent;color:var(--muted);\n  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:600;cursor:pointer;\n  border-bottom:2px solid transparent;transition:all .12s;text-align:center;}\n.tab:hover{color:var(--text);}\n.tab.on{color:var(--blue);border-bottom-color:var(--blue);}\n.tp{display:none;flex-direction:column;overflow-y:auto;flex:1;}\n.tp.on{display:flex;}\n.tp::-webkit-scrollbar{width:3px;}\n.tp::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}\n.sec{padding:8px 9px 10px;border-bottom:1px solid var(--border);}\n.sec:last-child{border-bottom:none;}\n.st{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}\n.tg{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;}\n.tool{aspect-ratio:1;background:var(--panel2);border:1px solid var(--border);border-radius:5px;\n  font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;\n  transition:all .12s;position:relative;user-select:none;}\n.tool:hover{border-color:var(--blue);background:#1e3a54;}\n.tool.on{border-color:var(--blue);background:var(--bd);box-shadow:0 0 0 2px rgba(59,158,255,.2);}\n.tool[title]:hover::after{content:attr(title);position:absolute;left:calc(100% + 5px);top:50%;\n  transform:translateY(-50%);background:#111;color:#fff;font-size:9px;padding:2px 5px;\n  border-radius:3px;white-space:nowrap;z-index:999;pointer-events:none;}\n.sw-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:5px;}\n.sw{aspect-ratio:1;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s,border-color .12s;}\n.sw:hover{transform:scale(1.18);}\n.sw.on{border-color:#fff;transform:scale(1.1);}\n.crow{display:flex;align-items:center;gap:5px;margin-top:3px;}\n.crow label{font-size:9px;color:var(--muted);flex:1;}\n.crow input[type=color]{width:24px;height:20px;border:1px solid var(--border);border-radius:3px;cursor:pointer;padding:1px;background:var(--panel2);}\n.sr{display:flex;align-items:center;gap:5px;margin-bottom:5px;}\n.sr label{font-size:9px;color:var(--muted);width:44px;flex-shrink:0;}\n.sr input[type=range]{flex:1;height:3px;accent-color:var(--blue);cursor:pointer;}\n.sv{font-size:9px;font-family:'Courier New',Courier,monospace;color:var(--blue);width:20px;text-align:right;flex-shrink:0;}\n.mr{display:flex;gap:3px;flex-wrap:wrap;}\n.mb{flex:1;min-width:26px;padding:4px 2px;background:var(--panel2);border:1px solid var(--border);\n  border-radius:4px;color:var(--muted);font-size:9px;font-weight:500;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;\n  cursor:pointer;text-align:center;transition:all .12s;}\n.mb:hover{color:var(--text);border-color:var(--blue);}\n.mb.on{background:var(--bd);color:var(--blue);border-color:var(--blue);}\n.fb{width:100%;padding:6px;background:var(--blue);border:none;border-radius:5px;color:#fff;\n  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:background .12s;margin-top:3px;}\n.fb:hover{background:#5aacff;}\n.fb.danger{background:#7a1515;} .fb.danger:hover{background:#c0392b;}\n.rp{display:flex;gap:3px;margin-bottom:4px;}\n.rp input{flex:1;width:0;background:var(--panel2);border:1px solid var(--border);border-radius:4px;\n  padding:3px 5px;color:var(--text);font-family:'Courier New',Courier,monospace;font-size:10px;outline:none;}\n.rp input:focus{border-color:var(--blue);}\n.fnrow{display:flex;align-items:center;gap:3px;margin-bottom:4px;}\n.fdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;cursor:pointer;}\n.finp{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:4px;\n  padding:4px 5px;color:var(--text);font-family:'Courier New',Courier,monospace;font-size:10px;outline:none;}\n.finp:focus{border-color:var(--blue);}\n.fdel{width:17px;height:17px;background:#3a1a1a;border:none;border-radius:3px;color:var(--red);\n  font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}\n.fdel:hover{background:#5a2020;}\n\n/* CANVAS */\n#cw{flex:1;position:relative;overflow:hidden;\n  background:radial-gradient(circle,#c8d3e0 1px,transparent 1px) 0 0/20px 20px,#e8edf3;}\n#dc,#gc,#ac,#uc{position:absolute;inset:0;width:100%;height:100%;}\n#dc{z-index:1;}#gc{z-index:2;pointer-events:none;}#ac{z-index:3;pointer-events:none;}#uc{z-index:4;}\n#to{position:absolute;display:none;z-index:60;}\n#ti{border:2px dashed var(--blue);background:rgba(255,255,255,.95);color:#111;\n  padding:3px 7px;outline:none;border-radius:4px;min-width:90px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;}\n\n/* STATUS */\n#sbar{height:22px;background:var(--panel);border-top:1px solid var(--border);display:flex;\n  align-items:center;padding:0 10px;gap:12px;font-size:9px;color:var(--muted);\n  font-family:'Courier New',Courier,monospace;flex-shrink:0;}\n.sdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;\n  vertical-align:middle;border:1px solid rgba(255,255,255,.2);}\n<\/style>\n<\/head>\n<body>\n\n<div id=\"tb\">\n  <span class=\"brand\">\u270f\ufe0f MYP Drawing Tool<\/span>\n  <div class=\"sp\"><\/div>\n  <button class=\"b\" onclick=\"newCanvas()\">New<\/button>\n  <button class=\"b\" onclick=\"saveAsPNG()\">\ud83d\udcbe PNG<\/button>\n  <button class=\"b\" onclick=\"copyImg()\" id=\"copybtn\">\ud83d\udccb Copy<\/button>\n  <div class=\"sp\"><\/div>\n  <button class=\"b\" onclick=\"undo()\">\u21a9 Undo<\/button>\n  <button class=\"b\" onclick=\"redo()\">\u21aa Redo<\/button>\n  <button class=\"b\" onclick=\"clearAll()\">\ud83d\uddd1 Clear<\/button>\n  <div class=\"sp\"><\/div>\n  <button class=\"b\" id=\"gridbtn\" onclick=\"toggleGrid()\">\u229e Grid<\/button>\n  <button class=\"b\" id=\"snapbtn\" onclick=\"toggleSnap()\">\ud83e\uddf2 Snap<\/button>\n  <button class=\"b\" id=\"rulerbtn\" onclick=\"toggleRuler()\">\ud83d\udcd0 Ruler<\/button>\n  <div class=\"tsp\"><\/div>\n  <button class=\"b\" onclick=\"doZoom(-.15)\">\u2212<\/button>\n  <span id=\"zlbl\" style=\"font-size:10px;color:var(--muted);font-family:'Courier New',Courier,monospace;min-width:32px;text-align:center;\">100%<\/span>\n  <button class=\"b\" onclick=\"doZoom(+.15)\">+<\/button>\n  <button class=\"b\" onclick=\"resetZoom()\">\u2299<\/button>\n  <div class=\"sp\"><\/div>\n  <button id=\"ins-btn\" onclick=\"insertToQuestion()\">\u2795 Insert into Question<\/button>\n<\/div>\n\n<div id=\"body\">\n<div id=\"sb\">\n  <div id=\"tabs\">\n    <button class=\"tab on\" onclick=\"showTab('tools')\">Tools<\/button>\n    <button class=\"tab\"    onclick=\"showTab('style')\">Style<\/button>\n    <button class=\"tab\"    onclick=\"showTab('graph')\">Graph<\/button>\n    <button class=\"tab\"    onclick=\"showTab('axis')\">Axis<\/button>\n  <\/div>\n\n  <!-- TOOLS TAB -->\n  <div class=\"tp on\" id=\"tp-tools\">\n    <div class=\"sec\">\n      <div class=\"st\">Draw<\/div>\n      <div class=\"tg\">\n        <div class=\"tool on\" id=\"t-pen\"     onclick=\"setTool('pen')\"     title=\"Pen (P)\">\u270f\ufe0f<\/div>\n        <div class=\"tool\"    id=\"t-eraser\"  onclick=\"setTool('eraser')\"  title=\"Eraser (E)\">\ud83e\uddf9<\/div>\n        <div class=\"tool\"    id=\"t-line\"    onclick=\"setTool('line')\"    title=\"Line (L)\">\u2571<\/div>\n        <div class=\"tool\"    id=\"t-arrow\"   onclick=\"setTool('arrow')\"   title=\"Arrow (A)\">\u279c<\/div>\n        <div class=\"tool\"    id=\"t-dbarrow\" onclick=\"setTool('dbarrow')\" title=\"Double Arrow\">\u27fa<\/div>\n        <div class=\"tool\"    id=\"t-text\"    onclick=\"setTool('text')\"    title=\"Text (T)\">T<\/div>\n      <\/div>\n    <\/div>\n    <div class=\"sec\">\n      <div class=\"st\">Shapes<\/div>\n      <div class=\"tg\">\n        <div class=\"tool\" id=\"t-rect\"        onclick=\"setTool('rect')\"        title=\"Rectangle (R)\">\u25ad<\/div>\n        <div class=\"tool\" id=\"t-circle\"      onclick=\"setTool('circle')\"      title=\"Ellipse (C)\">\u25cb<\/div>\n        <div class=\"tool\" id=\"t-triangle\"    onclick=\"setTool('triangle')\"    title=\"Triangle\">\u25b3<\/div>\n        <div class=\"tool\" id=\"t-rtri\"        onclick=\"setTool('rtri')\"        title=\"Right Triangle\">\u25fa<\/div>\n        <div class=\"tool\" id=\"t-diamond\"     onclick=\"setTool('diamond')\"     title=\"Diamond\">\u25c7<\/div>\n        <div class=\"tool\" id=\"t-star\"        onclick=\"setTool('star')\"        title=\"Star\">\u2605<\/div>\n        <div class=\"tool\" id=\"t-hexagon\"     onclick=\"setTool('hexagon')\"     title=\"Hexagon\">\u2b21<\/div>\n        <div class=\"tool\" id=\"t-pentagon\"    onclick=\"setTool('pentagon')\"    title=\"Pentagon\">\u2b20<\/div>\n        <div class=\"tool\" id=\"t-parallelogram\" onclick=\"setTool('parallelogram')\" title=\"Parallelogram\">\u25b1<\/div>\n        <div class=\"tool\" id=\"t-trapezoid\"   onclick=\"setTool('trapezoid')\"   title=\"Trapezoid\">\u23e2<\/div>\n        <div class=\"tool\" id=\"t-cloud\"       onclick=\"setTool('cloud')\"       title=\"Cloud\">\u2601<\/div>\n        <div class=\"tool\" id=\"t-cross\"       onclick=\"setTool('cross')\"       title=\"Cross\">\u271a<\/div>\n      <\/div>\n    <\/div>\n    <div class=\"sec\" id=\"txt-opts\" style=\"display:none;\">\n      <div class=\"st\">Text<\/div>\n      <div class=\"sr\"><label>Size<\/label>\n        <input type=\"range\" id=\"tszsl\" min=\"8\" max=\"72\" value=\"18\" oninput=\"setTxtSize(+this.value)\">\n        <span class=\"sv\" id=\"tszv\">18<\/span><\/div>\n      <div class=\"mr\">\n        <button class=\"mb on\" id=\"ts-n\" onclick=\"setTxtStyle('normal')\">Aa<\/button>\n        <button class=\"mb\"    id=\"ts-b\" onclick=\"setTxtStyle('bold')\"><b>B<\/b><\/button>\n        <button class=\"mb\"    id=\"ts-i\" onclick=\"setTxtStyle('italic')\"><i>I<\/i><\/button>\n      <\/div>\n    <\/div>\n  <\/div>\n\n  <!-- STYLE TAB -->\n  <div class=\"tp\" id=\"tp-style\">\n    <div class=\"sec\">\n      <div class=\"st\">Stroke Color<\/div>\n      <div class=\"sw-grid\" id=\"sw-stroke\"><\/div>\n      <div class=\"crow\"><label>Custom<\/label>\n        <input type=\"color\" id=\"cstroke\" value=\"#1a1d23\" onchange=\"setStroke(this.value)\">\n        <span id=\"shex\" style=\"font-size:9px;font-family:'Courier New',Courier,monospace;color:var(--muted);\">#1a1d23<\/span>\n      <\/div>\n    <\/div>\n    <div class=\"sec\">\n      <div class=\"st\">Fill<\/div>\n      <div class=\"mr\" style=\"margin-bottom:5px;\">\n        <button class=\"mb on\" id=\"fill-none\"  onclick=\"setFillMode('none')\">None<\/button>\n        <button class=\"mb\"    id=\"fill-solid\" onclick=\"setFillMode('solid')\">Solid<\/button>\n      <\/div>\n      <div class=\"sw-grid\" id=\"sw-fill\"><\/div>\n      <div class=\"crow\"><label>Custom<\/label>\n        <input type=\"color\" id=\"cfill\" value=\"#e8f4ff\" onchange=\"setFillCol(this.value)\">\n      <\/div>\n    <\/div>\n    <div class=\"sec\">\n      <div class=\"st\">Stroke Style<\/div>\n      <div class=\"sr\"><label>Width<\/label>\n        <input type=\"range\" id=\"szsl\" min=\"1\" max=\"50\" value=\"2\" oninput=\"setSize(+this.value)\">\n        <span class=\"sv\" id=\"szv\">2<\/span><\/div>\n      <div class=\"sr\"><label>Opacity<\/label>\n        <input type=\"range\" id=\"opsl\" min=\"5\" max=\"100\" value=\"100\" oninput=\"setOpacity(+this.value)\">\n        <span class=\"sv\" id=\"opv\">100<\/span><\/div>\n      <div class=\"mr\">\n        <button class=\"mb on\" id=\"ls-solid\"  onclick=\"setLS('solid')\">\u2014<\/button>\n        <button class=\"mb\"    id=\"ls-dashed\" onclick=\"setLS('dashed')\">\u2013 \u2013<\/button>\n        <button class=\"mb\"    id=\"ls-dotted\" onclick=\"setLS('dotted')\">\u00b7 \u00b7 \u00b7<\/button>\n      <\/div>\n    <\/div>\n  <\/div>\n\n  <!-- GRAPH TAB -->\n  <div class=\"tp\" id=\"tp-graph\">\n    <div class=\"sec\">\n      <div class=\"st\">Functions<\/div>\n      <div id=\"fnlist\"><\/div>\n      <button class=\"mb\" style=\"width:100%;margin-bottom:5px;\" onclick=\"addFn()\">+ Add Function<\/button>\n      <button class=\"fb\" onclick=\"plotGraph()\">\ud83d\udcc8 Plot<\/button>\n      <button class=\"fb danger\" onclick=\"clearGraph()\" style=\"margin-top:3px;\">\u2715 Clear<\/button>\n    <\/div>\n    <div class=\"sec\">\n      <div class=\"st\">Axis Range<\/div>\n      <div style=\"display:flex;gap:4px;align-items:center;margin-bottom:4px;\">\n        <span style=\"font-size:9px;color:var(--muted);width:10px;\">x<\/span>\n        <div class=\"rp\" style=\"flex:1;margin:0;\">\n          <input type=\"number\" id=\"xmin\" value=\"-10\" placeholder=\"min\">\n          <input type=\"number\" id=\"xmax\" value=\"10\" placeholder=\"max\">\n        <\/div>\n      <\/div>\n      <div style=\"display:flex;gap:4px;align-items:center;margin-bottom:6px;\">\n        <span style=\"font-size:9px;color:var(--muted);width:10px;\">y<\/span>\n        <div class=\"rp\" style=\"flex:1;margin:0;\">\n          <input type=\"number\" id=\"ymin\" value=\"-10\" placeholder=\"min\">\n          <input type=\"number\" id=\"ymax\" value=\"10\" placeholder=\"max\">\n        <\/div>\n      <\/div>\n      <div class=\"mr\">\n        <button class=\"mb\" onclick=\"zoomInG()\">Zoom+<\/button>\n        <button class=\"mb\" onclick=\"zoomOutG()\">Zoom\u2212<\/button>\n        <button class=\"mb\" onclick=\"resetGV()\">Reset<\/button>\n      <\/div>\n    <\/div>\n  <\/div>\n\n  <!-- AXIS TAB -->\n  <div class=\"tp\" id=\"tp-axis\">\n    <div class=\"sec\">\n      <div class=\"st\">Axis Direction<\/div>\n      <div class=\"mr\" style=\"margin-bottom:6px;\">\n        <button class=\"mb on\" id=\"ax-x\"  onclick=\"setAxDir('x')\">\u2192 x<\/button>\n        <button class=\"mb\"    id=\"ax-y\"  onclick=\"setAxDir('y')\">\u2191 y<\/button>\n        <button class=\"mb\"    id=\"ax-xy\" onclick=\"setAxDir('xy')\">\u2295 Both<\/button>\n      <\/div>\n      <button class=\"fb\" onclick=\"setTool('axis')\" id=\"t-axis\">\ud83d\udd8a Draw Axis on Canvas<\/button>\n    <\/div>\n    <div class=\"sec\">\n      <div class=\"st\">Scale &amp; Labels<\/div>\n      <div class=\"sr\"><label>Step<\/label>\n        <input type=\"range\" id=\"axstep\" min=\"1\" max=\"20\" value=\"1\"\n               oninput=\"axStep=+this.value;document.getElementById('axstepv').textContent=this.value\">\n        <span class=\"sv\" id=\"axstepv\">1<\/span><\/div>\n      <div class=\"sr\"><label>Start at<\/label>\n        <input type=\"range\" id=\"axstart\" min=\"-20\" max=\"0\" value=\"0\"\n               oninput=\"axStart=+this.value;document.getElementById('axstartv').textContent=this.value\">\n        <span class=\"sv\" id=\"axstartv\">0<\/span><\/div>\n      <div class=\"mr\">\n        <button class=\"mb on\" id=\"lbl-y\" onclick=\"setAxLbls(true)\">Labels \u2713<\/button>\n        <button class=\"mb\"    id=\"lbl-n\" onclick=\"setAxLbls(false)\">Labels \u2717<\/button>\n      <\/div>\n    <\/div>\n    <div class=\"sec\">\n      <div class=\"st\">Origin Style<\/div>\n      <div class=\"mr\" style=\"margin-bottom:5px;\">\n        <button class=\"mb on\" id=\"org-zero\"   onclick=\"setOrigStyle('zero')\">0<\/button>\n        <button class=\"mb\"    id=\"org-wiggle\" onclick=\"setOrigStyle('wiggle')\">\u3030 Break<\/button>\n        <button class=\"mb\"    id=\"org-none\"   onclick=\"setOrigStyle('none')\">None<\/button>\n      <\/div>\n      <div class=\"sr\"><label>Tick sz<\/label>\n        <input type=\"range\" id=\"ticksz\" min=\"3\" max=\"20\" value=\"8\"\n               oninput=\"axTickSz=+this.value;document.getElementById('tickszv').textContent=this.value\">\n        <span class=\"sv\" id=\"tickszv\">8<\/span><\/div>\n    <\/div>\n    <div class=\"sec\">\n      <div class=\"st\">Axis Color<\/div>\n      <div class=\"sw-grid\" id=\"sw-axis\"><\/div>\n      <div class=\"crow\"><label>Custom<\/label>\n        <input type=\"color\" id=\"caxis\" value=\"#1a1d23\" onchange=\"axColor=this.value;\">\n      <\/div>\n    <\/div>\n    <div class=\"sec\">\n      <button class=\"fb danger\" onclick=\"clearAxes()\" style=\"margin-top:0;\">\u2715 Clear All Axes<\/button>\n    <\/div>\n  <\/div>\n<\/div><!-- /sb -->\n\n<div id=\"cw\">\n  <canvas id=\"dc\"><\/canvas>\n  <canvas id=\"gc\"><\/canvas>\n  <canvas id=\"ac\"><\/canvas>\n  <canvas id=\"uc\"><\/canvas>\n  <div id=\"to\"><input id=\"ti\" type=\"text\" placeholder=\"Type\u2026\" onkeydown=\"commitTxt(event)\"><\/div>\n<\/div>\n<\/div><!-- /body -->\n\n<div id=\"sbar\">\n  <span id=\"st-tool\">Pen<\/span>\n  <span id=\"st-pos\">0 , 0<\/span>\n  <span><span class=\"sdot\" id=\"scdot\" style=\"background:#1a1d23;\"><\/span><span id=\"schex\">#1a1d23<\/span><\/span>\n  <span id=\"stsz\">2 px<\/span>\n  <span id=\"stmsg\" style=\"color:var(--green);margin-left:auto;\"><\/span>\n<\/div>\n\n<script>\nconst dC=document.getElementById('dc'),gC=document.getElementById('gc');\nconst aC=document.getElementById('ac'),uC=document.getElementById('uc');\nconst dX=dC.getContext('2d'),gX=gC.getContext('2d'),aX=aC.getContext('2d'),uX=uC.getContext('2d');\n\nlet tool='pen',strokeCol='#1a1d23',fillCol='rgba(59,158,255,0.12)',fillMode='none';\nlet sz=2,op=1,ls='solid',txtSize=18,txtStyle='normal';\nlet drawing=false,sx=0,sy=0,snapOn=false,showRuler=false,zoomLvl=1,showGrid=false;\nlet history=[],redoStack=[],txtPos={x:0,y:0};\nconst SNAP=15;\nlet axDir='x',axStep=1,axStart=0,axLabels=true,axOrigStyle='zero',axTickSz=8,axColor='#1a1d23';\nlet axesDrawn=[];\nlet fns=[],fnCols=['#e74c3c','#3b9eff','#3ddc84','#f5a623','#b983ff','#ff6ec7','#00cfc1'],fnCI=0;\n\nconst SCOLS=['#1a1d23','#e74c3c','#3b9eff','#3ddc84','#f5a623','#b983ff','#ff6ec7','#00cfc1','#ff8c42','#ffffff'];\nconst FCOLS=['rgba(231,76,60,.15)','rgba(59,158,255,.12)','rgba(61,220,132,.12)','rgba(245,166,35,.15)','rgba(185,131,255,.12)','rgba(0,207,193,.12)','rgba(255,255,255,.7)','rgba(200,210,230,.3)'];\nconst AXCOLS=['#1a1d23','#444','#888','#e74c3c','#3b9eff','#3ddc84'];\n\nfunction init(){\n  resize();\n  window.addEventListener('resize',()=>{resize();redrawAll();});\n  buildAllSwatches();\n  addFn();addFn();\n  requestAnimationFrame(()=>saveHist()); // FIX: wait for canvas to be sized\n}\n\nfunction resize(){\n  const wr=document.getElementById('cw'),w=wr.clientWidth,h=wr.clientHeight;\n  [dC,gC,aC,uC].forEach(c=>{c.width=w;c.height=h;});\n}\n\nfunction redrawAll(){\n  if(history.length)dX.putImageData(history[history.length-1],0,0);\n  redrawAxes();\n}\n\n// TABS\nfunction showTab(id){\n  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',['tools','style','graph','axis'][i]===id));\n  document.querySelectorAll('.tp').forEach(p=>p.classList.remove('on'));\n  document.getElementById('tp-'+id).classList.add('on');\n}\n\n// TOOL\nfunction setTool(t){\n  tool=t;\n  document.querySelectorAll('.tool').forEach(b=>b.classList.remove('on'));\n  const btn=document.getElementById('t-'+t);if(btn)btn.classList.add('on');\n  document.getElementById('txt-opts').style.display=t==='text'?'block':'none';\n  if(t==='axis'){showTab('axis');document.getElementById('t-axis').style.background='#1e4f7a';}\n  else{document.getElementById('t-axis').style.background='';}\n  uC.style.cursor=t==='text'?'text':t==='eraser'?'cell':'crosshair';\n  document.getElementById('st-tool').textContent=t.charAt(0).toUpperCase()+t.slice(1);\n}\n\n// STYLE\nfunction setStroke(c){\n  strokeCol=c;\n  document.querySelectorAll('#sw-stroke .sw').forEach((s,i)=>s.classList.toggle('on',SCOLS[i]===c));\n  document.getElementById('cstroke').value=c.startsWith('#')&&c.length===7?c:'#000000';\n  document.getElementById('shex').textContent=c;\n  document.getElementById('scdot').style.background=c;\n  document.getElementById('schex').textContent=c;\n}\nfunction setFillCol(c){fillCol=c;}\nfunction setFillMode(m){fillMode=m;document.getElementById('fill-none').classList.toggle('on',m==='none');document.getElementById('fill-solid').classList.toggle('on',m==='solid');}\nfunction setSize(s){sz=s;document.getElementById('szv').textContent=s;document.getElementById('stsz').textContent=s+' px';}\nfunction setOpacity(o){op=o/100;document.getElementById('opv').textContent=o;}\nfunction setLS(s){ls=s;['solid','dashed','dotted'].forEach(x=>document.getElementById('ls-'+x).classList.toggle('on',x===s));}\nfunction setTxtSize(s){txtSize=s;document.getElementById('tszv').textContent=s;}\nfunction setTxtStyle(s){txtStyle=s;['n','b','i'].forEach(x=>document.getElementById('ts-'+x).classList.toggle('on',['normal','bold','italic'][['n','b','i'].indexOf(x)]===s));}\nfunction setAxDir(d){axDir=d;['x','y','xy'].forEach(x=>document.getElementById('ax-'+x).classList.toggle('on',x===d));}\nfunction setAxLbls(v){axLabels=v;document.getElementById('lbl-y').classList.toggle('on',v);document.getElementById('lbl-n').classList.toggle('on',!v);}\nfunction setOrigStyle(s){axOrigStyle=s;['zero','wiggle','none'].forEach(x=>document.getElementById('org-'+x).classList.toggle('on',x===s));}\n\nfunction buildAllSwatches(){\n  bsw('sw-stroke',SCOLS,setStroke,strokeCol,false);\n  bsw('sw-fill',FCOLS,setFillCol,null,true);\n  bsw('sw-axis',AXCOLS,c=>{axColor=c;},axColor,false);\n}\nfunction bsw(id,cols,fn,active,isFill){\n  const el=document.getElementById(id);el.innerHTML='';\n  cols.forEach(c=>{\n    const d=document.createElement('div');\n    d.className='sw'+(c===active?' on':'');\n    d.style.background=c;\n    if(c==='#ffffff')d.style.border='2px solid #555';\n    if(isFill)d.style.border='2px solid rgba(255,255,255,.15)';\n    d.onclick=()=>fn(c);\n    el.appendChild(d);\n  });\n}\n\n// EVENTS\nuC.addEventListener('mousedown',e=>onDown(e));\nuC.addEventListener('mousemove',e=>onMove(e));\nuC.addEventListener('mouseup',e=>onUp(e));\nuC.addEventListener('mouseleave',e=>onUp(e));\nuC.addEventListener('touchstart',e=>{e.preventDefault();onDown(toM(e));},{passive:false});\nuC.addEventListener('touchmove',e=>{e.preventDefault();onMove(toM(e));},{passive:false});\nuC.addEventListener('touchend',e=>{e.preventDefault();onUp(toM(e));},{passive:false});\nfunction toM(e){const t=e.touches[0]||e.changedTouches[0];return{clientX:t.clientX,clientY:t.clientY};}\nfunction getXY(e){\n  const r=uC.getBoundingClientRect();\n  let x=(e.clientX-r.left)/zoomLvl,y=(e.clientY-r.top)/zoomLvl;\n  if(snapOn){x=Math.round(x/SNAP)*SNAP;y=Math.round(y/SNAP)*SNAP;}\n  return[x,y];\n}\nfunction onDown(e){const[x,y]=getXY(e);if(tool==='text'){showTxtInput(x,y);return;}drawing=true;sx=x;sy=y;if(tool==='pen'||tool==='eraser'){applyStyle(dX);dX.beginPath();dX.moveTo(x,y);}}\nfunction onMove(e){\n  const[x,y]=getXY(e);\n  document.getElementById('st-pos').textContent=`${Math.round(x)} , ${Math.round(y)}`;\n  if(showRuler)drawRulerLines(x,y);\n  if(!drawing)return;\n  if(tool==='pen'||tool==='eraser'){applyStyle(dX);dX.lineTo(x,y);dX.stroke();}\n  else{uX.clearRect(0,0,uC.width,uC.height);drawShape(uX,tool,sx,sy,x,y);if(showRuler)drawRulerLines(x,y);}\n}\nfunction onUp(e){\n  if(!drawing)return;drawing=false;\n  const[x,y]=getXY(e);\n  if(tool!=='pen'&&tool!=='eraser'){\n    if(tool==='axis')commitAxis(sx,sy,x,y);\n    else drawShape(dX,tool,sx,sy,x,y);\n    uX.clearRect(0,0,uC.width,uC.height);\n  }\n  if(tool!=='graph')saveHist();\n}\n\nfunction applyStyle(ctx){\n  ctx.globalAlpha=op;\n  ctx.strokeStyle=tool==='eraser'?'#ffffff':strokeCol;\n  ctx.fillStyle=fillCol;\n  ctx.lineWidth=tool==='eraser'?sz*4:sz;\n  ctx.lineCap='round';ctx.lineJoin='round';\n  if(ls==='dashed')ctx.setLineDash([sz*3,sz*2]);\n  else if(ls==='dotted')ctx.setLineDash([sz,sz*2.5]);\n  else ctx.setLineDash([]);\n}\n\n// SHAPES\nfunction drawShape(ctx,t,x1,y1,x2,y2){\n  applyStyle(ctx);ctx.beginPath();\n  if(t==='line'){ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}\n  else if(t==='arrow')drawArrow(ctx,x1,y1,x2,y2,false);\n  else if(t==='dbarrow')drawArrow(ctx,x1,y1,x2,y2,true);\n  else if(t==='rect'){if(fillMode==='solid')ctx.fillRect(x1,y1,x2-x1,y2-y1);ctx.strokeRect(x1,y1,x2-x1,y2-y1);}\n  else if(t==='circle'){const rx=Math.abs(x2-x1)/2,ry=Math.abs(y2-y1)/2;ctx.ellipse((x1+x2)/2,(y1+y2)/2,rx||1,ry||1,0,0,Math.PI*2);if(fillMode==='solid')ctx.fill();ctx.stroke();}\n  else if(t==='triangle'){ctx.moveTo((x1+x2)/2,y1);ctx.lineTo(x2,y2);ctx.lineTo(x1,y2);ctx.closePath();if(fillMode==='solid')ctx.fill();ctx.stroke();}\n  else if(t==='rtri'){ctx.moveTo(x1,y2);ctx.lineTo(x2,y2);ctx.lineTo(x1,y1);ctx.closePath();if(fillMode==='solid')ctx.fill();ctx.stroke();}\n  else if(t==='diamond'){const mx=(x1+x2)/2,my=(y1+y2)/2;ctx.moveTo(mx,y1);ctx.lineTo(x2,my);ctx.lineTo(mx,y2);ctx.lineTo(x1,my);ctx.closePath();if(fillMode==='solid')ctx.fill();ctx.stroke();}\n  else if(t==='star')drawPoly(ctx,x1,y1,x2,y2,5,true);\n  else if(t==='hexagon')drawPoly(ctx,x1,y1,x2,y2,6,false);\n  else if(t==='pentagon')drawPoly(ctx,x1,y1,x2,y2,5,false);\n  else if(t==='parallelogram'){const sk=(x2-x1)*.2;ctx.moveTo(x1+sk,y1);ctx.lineTo(x2,y1);ctx.lineTo(x2-sk,y2);ctx.lineTo(x1,y2);ctx.closePath();if(fillMode==='solid')ctx.fill();ctx.stroke();}\n  else if(t==='trapezoid'){const sk=(x2-x1)*.2;ctx.moveTo(x1+sk,y1);ctx.lineTo(x2-sk,y1);ctx.lineTo(x2,y2);ctx.lineTo(x1,y2);ctx.closePath();if(fillMode==='solid')ctx.fill();ctx.stroke();}\n  else if(t==='cloud')drawCloud(ctx,x1,y1,x2,y2);\n  else if(t==='cross')drawCross(ctx,x1,y1,x2,y2);\n}\nfunction drawArrow(ctx,x1,y1,x2,y2,dbl){\n  const hl=Math.max(12,sz*4),ang=Math.atan2(y2-y1,x2-x1);\n  ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.beginPath();\n  ctx.moveTo(x2,y2);ctx.lineTo(x2-hl*Math.cos(ang-Math.PI/7),y2-hl*Math.sin(ang-Math.PI/7));\n  ctx.moveTo(x2,y2);ctx.lineTo(x2-hl*Math.cos(ang+Math.PI/7),y2-hl*Math.sin(ang+Math.PI/7));\n  if(dbl){ctx.moveTo(x1,y1);ctx.lineTo(x1+hl*Math.cos(ang-Math.PI/7),y1+hl*Math.sin(ang-Math.PI/7));ctx.moveTo(x1,y1);ctx.lineTo(x1+hl*Math.cos(ang+Math.PI/7),y1+hl*Math.sin(ang+Math.PI/7));}\n  ctx.stroke();\n}\nfunction drawPoly(ctx,x1,y1,x2,y2,sides,star){\n  const cx=(x1+x2)/2,cy=(y1+y2)/2,r=Math.min(Math.abs(x2-x1),Math.abs(y2-y1))/2;\n  const inner=r*.4,pts=star?sides*2:sides;\n  ctx.beginPath();\n  for(let i=0;i<pts;i++){const ang=i*(Math.PI*2/pts)-Math.PI/2,rad=(star&&i%2===1)?inner:r;i===0?ctx.moveTo(cx+rad*Math.cos(ang),cy+rad*Math.sin(ang)):ctx.lineTo(cx+rad*Math.cos(ang),cy+rad*Math.sin(ang));}\n  ctx.closePath();if(fillMode==='solid')ctx.fill();ctx.stroke();\n}\nfunction drawCloud(ctx,x1,y1,x2,y2){\n  const cx=(x1+x2)/2,cy=(y1+y2)/2,w=Math.abs(x2-x1)/2,h=Math.abs(y2-y1)/2;\n  [{x:cx,y:cy-h*.3,r:w*.35},{x:cx-w*.3,y:cy+h*.1,r:w*.25},{x:cx+w*.3,y:cy+h*.1,r:w*.25},{x:cx-w*.55,y:cy+h*.4,r:w*.2},{x:cx+w*.55,y:cy+h*.4,r:w*.2},{x:cx,y:cy+h*.5,r:w*.35}]\n  .forEach(b=>{ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);if(fillMode==='solid')ctx.fill();ctx.stroke();});\n}\nfunction drawCross(ctx,x1,y1,x2,y2){\n  const w=Math.abs(x2-x1),h=Math.abs(y2-y1),t=Math.min(w,h)*.3;\n  const lx=Math.min(x1,x2),ly=Math.min(y1,y2),cx=lx+w/2,cy=ly+h/2;\n  ctx.beginPath();\n  ctx.moveTo(cx-t/2,ly);ctx.lineTo(cx+t/2,ly);ctx.lineTo(cx+t/2,cy-t/2);ctx.lineTo(lx+w,cy-t/2);\n  ctx.lineTo(lx+w,cy+t/2);ctx.lineTo(cx+t/2,cy+t/2);ctx.lineTo(cx+t/2,ly+h);ctx.lineTo(cx-t/2,ly+h);\n  ctx.lineTo(cx-t/2,cy+t/2);ctx.lineTo(lx,cy+t/2);ctx.lineTo(lx,cy-t/2);ctx.lineTo(cx-t/2,cy-t/2);\n  ctx.closePath();if(fillMode==='solid')ctx.fill();ctx.stroke();\n}\n\n// AXIS\nfunction commitAxis(x1,y1,x2,y2){\n  const a={x1,y1,x2,y2,dir:axDir,step:axStep,start:axStart,labels:axLabels,origStyle:axOrigStyle,tickSz:axTickSz,color:axColor};\n  axesDrawn.push(a);renderAxis(aX,a);\n}\nfunction redrawAxes(){aX.clearRect(0,0,aC.width,aC.height);axesDrawn.forEach(a=>renderAxis(aX,a));}\nfunction clearAxes(){axesDrawn=[];aX.clearRect(0,0,aC.width,aC.height);}\n\nfunction renderAxis(ctx,a){\n  ctx.save();\n  if(a.dir==='x'||a.dir==='xy')drawSingleAxis(ctx,a,'x');\n  if(a.dir==='y'||a.dir==='xy')drawSingleAxis(ctx,a,'y');\n  ctx.restore();\n}\nfunction drawSingleAxis(ctx,a,dir){\n  const isX=dir==='x';\n  const{x1,y1,x2,y2,step,start,labels,origStyle,tickSz,color}=a;\n  const ax1=x1,ay1=y1,ax2=isX?x2:x1,ay2=isX?y1:y2;\n  const len=isX?Math.abs(x2-x1):Math.abs(y2-y1);\n  const sign=isX?(x2>x1?1:-1):(y2>y1?1:-1);\n  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=2;ctx.lineCap='round';ctx.setLineDash([]);\n\n  // Wiggly origin break\n  if(origStyle==='wiggle'){\n    ctx.beginPath();\n    if(isX){ctx.moveTo(ax1,ay1);for(let i=0;i<5;i++){ctx.lineTo(ax1+sign*(i+1)*4,ay1+(i%2===0?-5:5));}ctx.lineTo(ax1+sign*24,ay1);}\n    else{ctx.moveTo(ax1,ay1);for(let i=0;i<5;i++){ctx.lineTo(ax1+(i%2===0?-5:5),ay1+sign*(i+1)*4);}ctx.lineTo(ax1,ay1+sign*24);}\n    ctx.stroke();\n  } else if(origStyle==='zero'){\n    ctx.font='bold 11px DM Mono,monospace';ctx.textAlign='center';\n    ctx.fillText('0',ax1+(isX?0:-14),ay1+(isX?14:0));\n  }\n\n  // Main line\n  ctx.beginPath();ctx.moveTo(ax1+(isX?20:0),ay1+(isX?0:20));ctx.lineTo(ax2,ay2);ctx.stroke();\n\n  // Arrow\n  const ang=isX?(x2>x1?0:Math.PI):(y2>y1?Math.PI/2:-Math.PI/2),hl=12;\n  ctx.beginPath();\n  ctx.moveTo(ax2,ay2);ctx.lineTo(ax2-hl*Math.cos(ang-Math.PI/7),ay2-hl*Math.sin(ang-Math.PI/7));\n  ctx.moveTo(ax2,ay2);ctx.lineTo(ax2-hl*Math.cos(ang+Math.PI/7),ay2-hl*Math.sin(ang+Math.PI/7));\n  ctx.stroke();\n\n  // Ticks and labels\n  const pixPerStep=len/Math.max(1,Math.round(len/(tickSz*5)))*step;\n  const nTicks=Math.floor(len/pixPerStep);\n  ctx.font='10px DM Mono,monospace';\n  for(let i=1;i<=nTicks;i++){\n    const px=isX?ax1+sign*i*pixPerStep:ax1,py=isX?ay1:ay1+sign*i*pixPerStep;\n    ctx.beginPath();\n    ctx.moveTo(isX?px:px-tickSz/2,isX?py-tickSz/2:py);\n    ctx.lineTo(isX?px:px+tickSz/2,isX?py+tickSz/2:py);\n    ctx.stroke();\n    if(labels){const val=start+(i*step);ctx.textAlign='center';ctx.fillText(val,isX?px:px-(tickSz+10),isX?py+(tickSz+12):py+4);}\n  }\n  ctx.font='bold 12px DM Sans';ctx.textAlign='left';\n  ctx.fillText(isX?'x':'y',ax2+(isX?4:-14),ay2+(isX?-6:4));\n}\n\n// TEXT\nfunction showTxtInput(x,y){\n  txtPos={x,y};\n  const ov=document.getElementById('to'),inp=document.getElementById('ti');\n  ov.style.display='block';ov.style.left=x+'px';ov.style.top=(y-22)+'px';\n  inp.style.fontSize=txtSize+'px';inp.style.fontWeight=txtStyle==='bold'?'700':'400';inp.style.fontStyle=txtStyle==='italic'?'italic':'normal';inp.style.color=strokeCol;inp.value='';inp.focus();\n}\nfunction commitTxt(e){\n  if(e.key==='Enter'||e.key==='Escape'){\n    const v=document.getElementById('ti').value;\n    if(v&&e.key==='Enter'){dX.globalAlpha=op;dX.fillStyle=strokeCol;dX.font=`${txtStyle==='italic'?'italic ':''} ${txtStyle==='bold'?'700':'400'} ${txtSize}px DM Sans,Arial`;dX.fillText(v,txtPos.x,txtPos.y);saveHist();}\n    document.getElementById('to').style.display='none';\n  }\n}\n\n// RULER\nfunction drawRulerLines(mx,my){\n  uX.clearRect(0,0,uC.width,uC.height);\n  uX.strokeStyle='rgba(59,158,255,.4)';uX.lineWidth=1;uX.setLineDash([4,4]);\n  uX.beginPath();uX.moveTo(mx,0);uX.lineTo(mx,uC.height);uX.stroke();\n  uX.beginPath();uX.moveTo(0,my);uX.lineTo(uC.width,my);uX.stroke();\n  uX.setLineDash([]);uX.fillStyle='rgba(59,158,255,.9)';uX.font='9px DM Mono,monospace';\n  uX.fillText(`${Math.round(mx)},${Math.round(my)}`,mx+5,my-4);\n}\n\n// GRAPH\nfunction addFn(){const def=['sin(x)','x^2/4','cos(x)','tan(x)','sqrt(abs(x))','1/x'];fns.push({expr:fns.length<def.length?def[fns.length]:'',color:fnCols[fnCI++%fnCols.length]});renderFnList();}\nfunction renderFnList(){\n  const el=document.getElementById('fnlist');el.innerHTML='';\n  fns.forEach((fn,i)=>{\n    const r=document.createElement('div');r.className='fnrow';\n    r.innerHTML=`<div class=\"fdot\" style=\"background:${fn.color}\" onclick=\"cycleFnC(${i})\"><\/div><input class=\"finp\" value=\"${fn.expr}\" placeholder=\"sin(x)\" oninput=\"fns[${i}].expr=this.value;plotGraph()\"><button class=\"fdel\" onclick=\"rmFn(${i})\">\u00d7<\/button>`;\n    el.appendChild(r);\n  });\n}\nfunction cycleFnC(i){fns[i].color=fnCols[fnCI++%fnCols.length];renderFnList();plotGraph();}\nfunction rmFn(i){fns.splice(i,1);renderFnList();plotGraph();}\n\nfunction plotGraph(){\n  const W=gC.width,H=gC.height;gX.clearRect(0,0,W,H);\n  const xmin=+document.getElementById('xmin').value,xmax=+document.getElementById('xmax').value;\n  const ymin=+document.getElementById('ymin').value,ymax=+document.getElementById('ymax').value;\n  if(xmin>=xmax||ymin>=ymax)return;\n  const tX=v=>((v-xmin)/(xmax-xmin))*W,tY=v=>H-((v-ymin)/(ymax-ymin))*H;\n  gX.fillStyle='rgba(255,255,255,0.93)';gX.fillRect(0,0,W,H);\n  const xs=calcStep(xmax-xmin),ys=calcStep(ymax-ymin);\n  gX.strokeStyle='rgba(0,0,0,.05)';gX.lineWidth=1;\n  for(let gx=Math.ceil(xmin/xs)*xs;gx<=xmax;gx+=xs){gX.beginPath();gX.moveTo(tX(gx),0);gX.lineTo(tX(gx),H);gX.stroke();}\n  for(let gy=Math.ceil(ymin/ys)*ys;gy<=ymax;gy+=ys){gX.beginPath();gX.moveTo(0,tY(gy));gX.lineTo(W,tY(gy));gX.stroke();}\n  gX.strokeStyle='rgba(0,0,0,.4)';gX.lineWidth=1.5;gX.setLineDash([]);\n  const ax0=xmin<=0&&0<=xmax?tX(0):null,ay0=ymin<=0&&0<=ymax?tY(0):null;\n  if(ay0!=null){gX.beginPath();gX.moveTo(0,ay0);gX.lineTo(W,ay0);gX.stroke();atip(W-12,ay0,W,ay0);}\n  if(ax0!=null){gX.beginPath();gX.moveTo(ax0,H);gX.lineTo(ax0,0);gX.stroke();atip(ax0,12,ax0,0);}\n  gX.fillStyle='rgba(0,0,0,.45)';gX.font='9px DM Mono,monospace';\n  const ly=ay0!=null?Math.min(ay0+12,H-4):H-4,lx=ax0!=null?Math.max(ax0-5,5):5;\n  for(let gx=Math.ceil(xmin/xs)*xs;gx<=xmax;gx+=xs){if(Math.abs(gx)<xs*.01)continue;gX.textAlign='center';gX.fillText(nFmt(gx),tX(gx),ly);}\n  for(let gy=Math.ceil(ymin/ys)*ys;gy<=ymax;gy+=ys){if(Math.abs(gy)<ys*.01)continue;gX.textAlign='right';gX.fillText(nFmt(gy),lx+26,tY(gy)+4);}\n  gX.fillStyle='#333';gX.font='bold 10px DM Sans';\n  if(ay0!=null){gX.textAlign='left';gX.fillText('x',W-7,ay0-5);}\n  if(ax0!=null){gX.textAlign='left';gX.fillText('y',ax0+4,12);}\n  fns.forEach(fn=>{\n    if(!fn.expr.trim())return;\n    gX.strokeStyle=fn.color;gX.lineWidth=2.5;gX.setLineDash([]);gX.beginPath();let first=true;\n    for(let px=0;px<=W*2;px++){\n      const x=xmin+(px/(W*2))*(xmax-xmin);let y;\n      try{y=evalFn(fn.expr,x);}catch(e){first=true;continue;}\n      if(!isFinite(y)||isNaN(y)||Math.abs(y)>1e7){first=true;continue;}\n      const prev=px>0?(()=>{try{return evalFn(fn.expr,xmin+((px-1)/(W*2))*(xmax-xmin));}catch(e){return NaN;}})():NaN;\n      if(isFinite(prev)&&Math.abs(y-prev)>(ymax-ymin)*.6)first=true;\n      const cy=tY(y);if(first){gX.moveTo(tX(x),cy);first=false;}else gX.lineTo(tX(x),cy);\n    }\n    gX.stroke();\n    try{const lx2=xmax-(xmax-xmin)*.04,ly2=evalFn(fn.expr,lx2);if(isFinite(ly2)&&ly2>ymin&&ly2<ymax){gX.fillStyle=fn.color;gX.font='bold 10px DM Sans';gX.textAlign='right';gX.fillText('y='+fn.expr,tX(lx2)-4,tY(ly2)-6);}}catch(e){}\n  });\n}\nfunction atip(fx,fy,tx,ty){const ang=Math.atan2(ty-fy,tx-fx),hl=9;gX.beginPath();gX.moveTo(tx,ty);gX.lineTo(tx-hl*Math.cos(ang-Math.PI/7),ty-hl*Math.sin(ang-Math.PI/7));gX.moveTo(tx,ty);gX.lineTo(tx-hl*Math.cos(ang+Math.PI/7),ty-hl*Math.sin(ang+Math.PI/7));gX.stroke();}\nfunction calcStep(r){const raw=r/8,mag=Math.pow(10,Math.floor(Math.log10(raw))),n=raw/mag;return n<1.5?mag:n<3.5?2*mag:n<7.5?5*mag:10*mag;}\nfunction nFmt(n){if(Math.abs(n)>=1000)return n.toExponential(0);return parseFloat(n.toPrecision(4)).toString();}\nfunction evalFn(expr,x){\n  let e=expr.replace(/\\^/g,'**').replace(/\\bsin\\b/g,'Math.sin').replace(/\\bcos\\b/g,'Math.cos').replace(/\\btan\\b/g,'Math.tan').replace(/\\bsqrt\\b/g,'Math.sqrt').replace(/\\bcbrt\\b/g,'Math.cbrt').replace(/\\babs\\b/g,'Math.abs').replace(/\\blog\\b/g,'Math.log10').replace(/\\bln\\b/g,'Math.log').replace(/\\bexp\\b/g,'Math.exp').replace(/\\bfloor\\b/g,'Math.floor').replace(/\\bceil\\b/g,'Math.ceil').replace(/\\bpi\\b/gi,'Math.PI').replace(/\\be\\b(?![a-zA-Z])/g,'Math.E').replace(/(\\d)(x)/g,'$1*$2').replace(/(x)(\\d)/g,'$1*$2');\n  return Function('\"use strict\";var x=arguments[0];return('+e+')')(x);\n}\nfunction clearGraph(){gX.clearRect(0,0,gC.width,gC.height);}\nfunction zoomInG(){['xmin','xmax','ymin','ymax'].forEach(id=>{document.getElementById(id).value=+document.getElementById(id).value*.7;});plotGraph();}\nfunction zoomOutG(){['xmin','xmax','ymin','ymax'].forEach(id=>{document.getElementById(id).value=+document.getElementById(id).value*1.43;});plotGraph();}\nfunction resetGV(){document.getElementById('xmin').value=-10;document.getElementById('xmax').value=10;document.getElementById('ymin').value=-10;document.getElementById('ymax').value=10;plotGraph();}\n\n// HISTORY\nfunction saveHist(){\n  if(dC.width===0||dC.height===0)return; // BUGFIX: prevent getImageData on zero-size canvas\n  history.push(dX.getImageData(0,0,dC.width,dC.height));\n  if(history.length>50)history.shift();\n  redoStack=[];\n}\nfunction undo(){if(history.length<=1)return;redoStack.push(history.pop());dX.putImageData(history[history.length-1],0,0);}\nfunction redo(){if(!redoStack.length)return;const s=redoStack.pop();history.push(s);dX.putImageData(s,0,0);}\n\n// CANVAS OPS\nfunction clearAll(){if(!confirm('Clear everything?'))return;dX.clearRect(0,0,dC.width,dC.height);clearGraph();clearAxes();history=[];saveHist();}\nfunction newCanvas(){if(!confirm('Start fresh?'))return;dX.clearRect(0,0,dC.width,dC.height);clearGraph();clearAxes();history=[];saveHist();}\n\nfunction mergedCanvas(){\n  const m=document.createElement('canvas');m.width=dC.width;m.height=dC.height;\n  const mx=m.getContext('2d');mx.fillStyle='white';mx.fillRect(0,0,m.width,m.height);\n  mx.drawImage(gC,0,0);mx.drawImage(aC,0,0);mx.drawImage(dC,0,0);return m;\n}\nfunction saveAsPNG(){const a=document.createElement('a');a.download='myp-drawing-'+new Date().toISOString().slice(0,10)+'.png';a.href=mergedCanvas().toDataURL('image/png');a.click();}\nasync function copyImg(){\n  mergedCanvas().toBlob(async b=>{\n    try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);flash('\u2705 Copied!');}\n    catch(e){flash('\u26a0\ufe0f Try Save PNG instead');}\n  });\n}\n\n// INSERT TO QUESTION\n// When embedded in MYP Workspace as an iframe, posts the image up to the parent.\n// When standalone, copies to clipboard so user can Ctrl+V into an answer box.\nfunction insertToQuestion(){\n  const dataURL=mergedCanvas().toDataURL('image/png');\n  if(window.parent&&window.parent!==window){\n    window.parent.postMessage({type:'myp-drawing-insert',dataURL},'*');\n    flash('\u2705 Inserted into answer box!',3000);\n  } else {\n    mergedCanvas().toBlob(async b=>{\n      try{\n        await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);\n        flash('\u2705 Copied! Now Ctrl+V into any answer box.',3000);\n      }catch(e){\n        const win=window.open('','_blank');\n        win.document.write(`<html><body style=\"margin:0;background:#111;padding:12px;font-family:sans-serif;color:white;\">\n          <p style=\"margin-bottom:8px;\">Right-click the image \u2192 <b>Copy image<\/b>, then paste into your answer box.<\/p>\n          <img src=\"${dataURL}\" style=\"max-width:100%;display:block;border:1px solid #333;\"><\/body><\/html>`);\n        flash('\ud83d\udccb Opened in new tab \u2014 right-click \u2192 Copy image',4000);\n      }\n    });\n  }\n}\n\n// ZOOM / TOGGLES\nfunction doZoom(d){zoomLvl=Math.max(.2,Math.min(5,zoomLvl+d));document.getElementById('zlbl').textContent=Math.round(zoomLvl*100)+'%';[dC,gC,aC].forEach(c=>{c.style.transform=`scale(${zoomLvl})`;c.style.transformOrigin='top left';});}\nfunction resetZoom(){zoomLvl=1;document.getElementById('zlbl').textContent='100%';[dC,gC,aC].forEach(c=>{c.style.transform='';c.style.transformOrigin='';});}\nfunction toggleGrid(){showGrid=!showGrid;document.getElementById('gridbtn').classList.toggle('active',showGrid);const wr=document.getElementById('cw');wr.style.backgroundImage=showGrid?'linear-gradient(rgba(0,90,150,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,90,150,.08) 1px,transparent 1px)':'radial-gradient(circle,#c8d3e0 1px,transparent 1px),radial-gradient(circle,#c8d3e0 1px,transparent 1px)';}\nfunction toggleSnap(){snapOn=!snapOn;document.getElementById('snapbtn').classList.toggle('active',snapOn);}\nfunction toggleRuler(){showRuler=!showRuler;document.getElementById('rulerbtn').classList.toggle('active',showRuler);if(!showRuler)uX.clearRect(0,0,uC.width,uC.height);}\n\nfunction flash(msg,dur=2200){const el=document.getElementById('stmsg');el.textContent=msg;clearTimeout(flash._t);flash._t=setTimeout(()=>el.textContent='',dur);}\n\ndocument.addEventListener('keydown',e=>{\n  if(e.target.tagName==='INPUT')return;\n  if(e.ctrlKey||e.metaKey){if(e.key==='z'){e.preventDefault();undo();}if(e.key==='y'){e.preventDefault();redo();}if(e.key==='s'){e.preventDefault();saveAsPNG();}}\n  const map={p:'pen',e:'eraser',l:'line',a:'arrow',r:'rect',c:'circle',t:'text'};\n  if(!e.ctrlKey&&!e.metaKey&&map[e.key])setTool(map[e.key]);\n});\n\n\n// Respond to parent workspace requesting an insert via postMessage\nwindow.addEventListener('message', function(e) {\n  if(e.data && e.data.type === 'myp-request-insert') insertToQuestion();\n});\n\ninit();\n<\/script>\n<\/body>\n<\/html>\n"
 }
 
 // ─────────────────────────────────────────────
@@ -536,18 +802,35 @@ function updateCounts(id, el) {
     $(`#char-count-${id}`).text(`${text.length} character${text.length!==1?'s':''}`);
 }
 
+function changePDF() {
+    const newUrl = prompt("Paste new Past Paper PDF URL:");
+    if(newUrl) {
+        document.getElementById('pdf-frame').src = newUrl;
+        if(draftEnabled) localStorage.setItem("myp_workspace_pdf", newUrl);
+    }
+}
+
+// ── Tablet pane switcher ──
+function switchPane(which) {
+    const pdfPane  = document.querySelector('.main-container .pane:first-child');
+    const workPane = document.getElementById('work-pane');
+    const tabs     = document.querySelectorAll('#pane-tabs button');
+    if(which === 'pdf') {
+        pdfPane.classList.remove('tab-hidden');
+        workPane.classList.add('tab-hidden');
+        if(tabs[0]) tabs[0].classList.add('active');
+        if(tabs[1]) tabs[1].classList.remove('active');
+    } else {
+        pdfPane.classList.add('tab-hidden');
+        workPane.classList.remove('tab-hidden');
+        if(tabs[0]) tabs[0].classList.remove('active');
+        if(tabs[1]) tabs[1].classList.add('active');
+    }
+}
+
 // ─────────────────────────────────────────────
 //  MWS SESSION ENCODE / DECODE
-//
-//  Images are intentionally NOT stored in the restore code.
-//  They print fine in the PDF (visible on paper) but are stripped
-//  from the code to keep it tiny. On restore, image slots are
-//  replaced with a small notice so the user knows to re-paste.
-//  Text, formatting, tables, labels, and structure all restore fully.
-//
-//  Format: MWS:2:url=<b64>&blocks=<b64-JSON>
 // ─────────────────────────────────────────────
-
 function encodeMWS() {
     const pdfUrl = document.getElementById('pdf-frame').src || '';
     const blocks = [];
@@ -558,7 +841,7 @@ function encodeMWS() {
         blocks.push({
             t: isSnip ? 's' : 'a',
             l: labelInput ? labelInput.value : '',
-            h: editable ? editable.innerHTML : ''   // images kept as-is (base64 inline)
+            h: editable ? editable.innerHTML : ''
         });
     });
     const urlB64    = btoa(unescape(encodeURIComponent(pdfUrl)));
@@ -574,21 +857,95 @@ function decodeMWS(code) {
             const idx = pair.indexOf('=');
             params[pair.slice(0,idx)] = pair.slice(idx+1);
         });
-        const pdfUrl = decodeURIComponent(escape(atob(params.url || '')));
-        const blocks = JSON.parse(decodeURIComponent(escape(atob(params.blocks || 'W10='))));
-        return { pdfUrl, blocks };
+        const pdfUrl      = decodeURIComponent(escape(atob(params.url || '')));
+        const blocks      = JSON.parse(decodeURIComponent(escape(atob(params.blocks || 'W10='))));
+        const savedSeconds = params.s ? parseInt(params.s, 10) : null;
+        return { pdfUrl, blocks, savedSeconds };
     } catch(e) { return null; }
 }
 
 // ─────────────────────────────────────────────
-//  SAVE EVERYTHING
-//  Step 1: Download .mws file (use this to continue editing later)
-//  Step 2: Auto-open print dialog (save as PDF for reading/printing)
+//  DETECT TABLET / MOBILE
 // ─────────────────────────────────────────────
-function saveSession() {
-    const mwsCode = encodeMWS();
+function isTablet() {
+    return window.innerWidth <= 900 ||
+           /Android|iPad|iPhone|iPod|tablet/i.test(navigator.userAgent);
+}
+
+// ─────────────────────────────────────────────
+//  BUILD EXPORT HTML
+//  A clean standalone .html file of all answers —
+//  works on every device, opens in any browser,
+//  images fully embedded, looks professional.
+// ─────────────────────────────────────────────
+function buildExportHTML() {
     const pdfUrl  = document.getElementById('pdf-frame').src || '';
     const dateStr = new Date().toLocaleString();
+    let blocksHTML = '';
+
+    document.querySelectorAll('#q-list .q-block').forEach((block, i) => {
+        const labelInput = block.querySelector('.q-label-input');
+        const editable   = block.querySelector('.ans-editable');
+        const isSnip     = block.style.border && block.style.border.includes('dashed');
+        const label      = isSnip
+            ? 'Question Snip ' + (i+1)
+            : (labelInput && labelInput.value.trim() ? labelInput.value.trim() : 'Question ' + (i+1));
+        const content    = editable ? editable.innerHTML : '';
+        const headerBg   = isSnip ? '#fff1e6' : '#f0f5fa';
+        const headerCol  = isSnip ? '#e67e22' : '#005a96';
+        blocksHTML += `
+        <div style="border:1px solid #ccc;border-radius:8px;margin-bottom:28px;overflow:hidden;page-break-inside:avoid;">
+            <div style="background:${headerBg};color:${headerCol};padding:10px 16px;font-weight:bold;font-size:15px;border-bottom:1px solid #ddd;">
+                ${isSnip ? '✂️ ' : '📝 '}${label}
+            </div>
+            <div style="padding:20px 24px;font-size:15px;line-height:1.6;background:white;">
+                ${content || '<em style="color:#aaa;">No answer written.</em>'}
+            </div>
+        </div>`;
+    });
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MYP Workspace — Saved Answers</title>
+<style>
+  body { font-family:'Segoe UI',Arial,sans-serif; max-width:860px; margin:40px auto; padding:0 20px; color:#222; }
+  h1 { color:#005a96; font-size:26px; margin-bottom:4px; }
+  .meta { color:#888; font-size:13px; margin-bottom:28px; }
+  img { max-width:100%; border:1px solid #ccc; margin:8px 0; display:block; }
+  table { border-collapse:collapse; width:100%; margin:10px 0; }
+  td, th { border:1px solid #ccc; padding:8px; }
+  @media print {
+    body { margin:20px; }
+    .no-print { display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="no-print" style="background:#005a96;color:white;padding:12px 20px;border-radius:8px;margin-bottom:24px;font-size:13px;">
+  💡 <b>Tip:</b> To save as PDF — tap your browser menu → <b>Share → Print</b> (iOS) or <b>⋮ → Print</b> (Android/Chrome).
+  &nbsp;·&nbsp; To continue editing — go back to <a href="https://themypworkspace-og.github.io/the-myp-workspace-V1/" style="color:#7dd3fc;">The MYP Workspace™</a> and load your .mws file.
+</div>
+<h1>The MYP Workspace™ — Saved Answers</h1>
+<p class="meta">Saved: ${dateStr}${pdfUrl ? ' &nbsp;·&nbsp; Paper: <a href="' + pdfUrl + '" style="color:#005a96;">View PDF</a>' : ''}</p>
+${blocksHTML || '<p style="color:#aaa;font-style:italic;">No answer blocks were found.</p>'}
+<p style="font-size:11px;color:#ccc;margin-top:40px;text-align:center;">Generated by The MYP Workspace™ · themypworkspace-og.github.io</p>
+</body>
+</html>`;
+}
+
+// ─────────────────────────────────────────────
+//  SAVE EVERYTHING
+//  Desktop: .mws download + print dialog (PDF)
+//  Tablet/Mobile: .mws download + .html export
+//    (print dialog unreliable on iOS/Android)
+// ─────────────────────────────────────────────
+function saveSession() {
+    const mwsCode  = encodeMWS();
+    const pdfUrl   = document.getElementById('pdf-frame').src || '';
+    const dateStr  = new Date().toLocaleString();
     const fileDate = new Date().toISOString().slice(0,10);
 
     // ── Build human-readable .mws file ──
@@ -598,8 +955,8 @@ function saveSession() {
     readable     += '================================================\n\n';
     readable     += '  📂 TO CONTINUE EDITING: Upload this file at\n';
     readable     += '     themypworkspace.github.io → "Load Session"\n\n';
-    readable     += '  🖨️  FOR A PRINTABLE COPY: See the PDF that was\n';
-    readable     += '     also saved at the same time as this file.\n\n';
+    readable     += '  🖨️  FOR A PRINTABLE COPY: See the .html export\n';
+    readable     += '     that was also saved at the same time.\n\n';
     readable     += '================================================\n\n';
     readable     += 'Past Paper URL: ' + pdfUrl + '\n\n';
     readable     += '------------------------------------------------\n\n';
@@ -612,7 +969,7 @@ function saveSession() {
                                   : (labelInput && labelInput.value.trim() ? labelInput.value.trim() : 'Question ' + (i+1));
         const rawText = (editable ? editable.innerHTML : '')
             .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/div>/gi, '\n')
-            .replace(/<img[^>]*>/gi, '[image — visible in the saved PDF]')
+            .replace(/<img[^>]*>/gi, '[image — see exported HTML for visual]')
             .replace(/<[^>]+>/g, '')
             .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&quot;/g,'"')
             .trim();
@@ -627,19 +984,46 @@ function saveSession() {
     readable += '================================================\n';
     readable += mwsCode + '\n';
 
-    // ── Download the .mws file ──
-    const blob = new Blob([readable], { type: 'text/plain;charset=utf-8' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url;
-    a.download = 'MYP-Session-' + fileDate + '.mws';
+    // ── Download .mws file ──
+    const mwsBlob = new Blob([readable], { type: 'text/plain;charset=utf-8' });
+    const mwsUrl  = URL.createObjectURL(mwsBlob);
+    const a1 = document.createElement('a');
+    a1.href = mwsUrl; a1.download = 'MYP-Session-' + fileDate + '.mws';
+    document.body.appendChild(a1); a1.click();
+    document.body.removeChild(a1);
+    URL.revokeObjectURL(mwsUrl);
+
+    if(isTablet()) {
+        // ── Tablet/Mobile: download a clean HTML export ──
+        // Print dialog is broken on iOS/Android — instead give them a
+        // standalone HTML file they can open in any browser and print from there
+        setTimeout(() => {
+            const htmlContent = buildExportHTML();
+            const htmlBlob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const htmlUrl  = URL.createObjectURL(htmlBlob);
+            const a2 = document.createElement('a');
+            a2.href = htmlUrl; a2.download = 'MYP-Answers-' + fileDate + '.html';
+            document.body.appendChild(a2); a2.click();
+            document.body.removeChild(a2);
+            URL.revokeObjectURL(htmlUrl);
+        }, 600);
+    } else {
+        // ── Desktop: trigger print dialog (saves as PDF) ──
+        setTimeout(() => { window.print(); }, 800);
+    }
+}
+
+// ── Tablet-only: export HTML only (no .mws) ──
+function exportHTMLOnly() {
+    const fileDate    = new Date().toISOString().slice(0,10);
+    const htmlContent = buildExportHTML();
+    const htmlBlob    = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const htmlUrl     = URL.createObjectURL(htmlBlob);
+    const a = document.createElement('a');
+    a.href = htmlUrl; a.download = 'MYP-Answers-' + fileDate + '.html';
     document.body.appendChild(a); a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    // ── Auto-trigger print dialog after short delay ──
-    // Browser needs a moment after the download trigger before print works reliably
-    setTimeout(() => { window.print(); }, 800);
+    URL.revokeObjectURL(htmlUrl);
 }
 
 // ─────────────────────────────────────────────
@@ -664,7 +1048,7 @@ function handleMWSUpload(file) {
             return;
         }
         statusEl.textContent = '✅ Session found! Restoring…';
-        setTimeout(() => { $('#load-modal').hide(); restoreSession(parsed.pdfUrl, parsed.blocks); }, 500);
+        setTimeout(() => { $('#load-modal').hide(); restoreSession(parsed.pdfUrl, parsed.blocks, parsed.savedSeconds); }, 500);
     };
     reader.onerror = function() { statusEl.textContent = '❌ Could not read the file.'; };
     reader.readAsText(file);
@@ -673,19 +1057,16 @@ function handleMWSUpload(file) {
 // ─────────────────────────────────────────────
 //  RESTORE SESSION from decoded blocks
 // ─────────────────────────────────────────────
-function restoreSession(pdfUrl, blocks) {
-    const t = document.getElementById('timer-input').value.split(':');
-    seconds = (+t[0]*3600) + (+t[1]*60) + (+t[2]);
+let _pendingRestore = null; // holds state while timer modal is open
 
+function restoreSession(pdfUrl, blocks, savedSeconds) {
+    // Load PDF and blocks immediately
     document.getElementById('splash-screen').style.display = 'none';
     document.getElementById('pdf-frame').src = pdfUrl;
     if(pdfUrl) document.getElementById('pdf-url').value = pdfUrl;
-    running = true;
-    startClock();
 
     $("#q-list").empty();
     blocks.forEach(b => {
-        // Support both v1 format (type/label/html) and v2 format (t/l/h)
         const type  = b.t || b.type;
         const label = b.l !== undefined ? b.l : (b.label || '');
         const html  = b.h !== undefined ? b.h : (b.html || '');
@@ -741,6 +1122,38 @@ function restoreSession(pdfUrl, blocks) {
                 </div>`);
         }
     });
+
+    // Now handle the timer — show modal if we have a saved time, else start immediately
+    if(savedSeconds != null && savedSeconds > 0) {
+        const h = Math.floor(savedSeconds/3600).toString().padStart(2,'0');
+        const m = Math.floor((savedSeconds%3600)/60).toString().padStart(2,'0');
+        const s = (savedSeconds%60).toString().padStart(2,'0');
+        const formatted = `${h}:${m}:${s}`;
+        document.getElementById('saved-time-display').textContent = formatted;
+        document.getElementById('saved-time-btn').textContent = formatted;
+        document.getElementById('new-timer-input').value = formatted;
+        _pendingRestore = savedSeconds;
+        document.getElementById('timer-restore-modal').style.display = 'flex';
+    } else {
+        // No saved time (old session format) — use the splash screen timer value
+        const t = document.getElementById('timer-input').value.split(':');
+        seconds = (+t[0]*3600) + (+t[1]*60) + (+t[2]);
+        running = true;
+        startClock();
+    }
+}
+
+function confirmTimerRestore(useSaved) {
+    document.getElementById('timer-restore-modal').style.display = 'none';
+    if(useSaved) {
+        seconds = _pendingRestore;
+    } else {
+        const val = document.getElementById('new-timer-input').value.split(':');
+        seconds = (+val[0]*3600) + (+val[1]*60) + (+val[2]);
+    }
+    _pendingRestore = null;
+    running = true;
+    startClock();
 }
 
 // ─────────────────────────────────────────────
@@ -766,7 +1179,12 @@ function refreshTargetDropdowns() {
     });
 }
 
-function openTool(id) { $(`#${id}`).fadeIn(); refreshTargetDropdowns(); }
+function openTool(id) {
+    $(`#${id}`).fadeIn();
+    refreshTargetDropdowns();
+    // Load the drawing tool as soon as the window opens (it's the default tab)
+    if(id === 'draw-tool' && !_drawingToolLoaded) { loadDrawingTool(); }
+}
 function closeTool(id) { $(`#${id}`).fadeOut(); }
 
 function triggerInsert(iframeId, selectId) {
