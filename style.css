@@ -108,14 +108,7 @@ body, html { height: 100%; font-family: 'DM Sans', 'Segoe UI', Arial, sans-serif
     padding: 48px 40px 32px;
     text-align: center;
 }
-.splash-hero-eyebrow {
-    display: inline-flex; align-items: center; gap: 7px;
-    background: white; border: 1.5px solid var(--splash-border);
-    border-radius: 20px; padding: 5px 14px;
-    font-size: 12px; font-weight: 600; color: var(--splash-muted);
-    margin-bottom: 18px;
-}
-.splash-hero-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--autosave-green); }
+
 .splash-hero h1 {
     font-family: 'Syne', sans-serif;
     font-weight: 800; font-size: 52px;
