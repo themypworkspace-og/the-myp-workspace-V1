@@ -182,6 +182,9 @@ function handlePDFUpload(file) {
     const reader = new FileReader();
     reader.onload = function(e) {
         _uploadedPDFDataURL = e.target.result;
+        localStorage.setItem(LS_PDF, _uploadedPDFDataURL);
+        localStorage.setItem(LS_PDF_SRC, 'upload');
+        document.getElementById('pdf-frame').src = _uploadedPDFDataURL;
         document.getElementById('pdf-chosen-name').textContent = file.name;
         document.getElementById('pdf-drop-zone').classList.add('has-file');
     };
@@ -263,14 +266,9 @@ function saveWork() {
     const dot = document.getElementById('autosave-dot');
     dot.className = 'autosave-dot saving';
 
-    const qHtml  = $("#q-list").html();
-    const pdfSrc = document.getElementById('pdf-frame').src || '';
-
-    localStorage.setItem(LS_DATA, qHtml);
-    localStorage.setItem(LS_PDF, pdfSrc);
-    localStorage.setItem(LS_PDF_SRC, _uploadedPDFDataURL ? 'upload' : 'url');
+    localStorage.setItem(LS_DATA, $("#q-list").html());
     localStorage.setItem(LS_TIMER, seconds.toString());
-    localStorage.setItem(LS_DIRTY, '1');    // mark as having unsaved live work
+    localStorage.setItem(LS_DIRTY, '1');
 
     setTimeout(() => {
         dot.className = 'autosave-dot on';
@@ -558,10 +556,8 @@ function changePDF() {
         if(newUrl) {
             document.getElementById('pdf-frame').src = newUrl;
             _uploadedPDFDataURL = null;
-            if(draftEnabled) {
-                localStorage.setItem(LS_PDF, newUrl);
-                localStorage.setItem(LS_PDF_SRC, 'url');
-            }
+            localStorage.setItem(LS_PDF, newUrl);
+            localStorage.setItem(LS_PDF_SRC, 'url');
         }
     }
 }
