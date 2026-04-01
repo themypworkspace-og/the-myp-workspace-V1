@@ -64,18 +64,25 @@
 <div id="load-modal" class="modal-overlay">
     <div class="load-modal-box">
         <h3>📂 Load Saved Session</h3>
-        <p style="font-size:13px;color:#555;margin-bottom:16px;">Upload the <b>.mws</b> session file from a previous session. All answers, question boxes, and your paper will be fully restored.</p>
+        <p style="font-size:13px;color:#555;margin-bottom:16px;">Upload the <b>.mws</b> session file from a previous session.</p>
+        
         <div class="drop-zone" id="mws-drop-zone" onclick="document.getElementById('mws-upload-input').click()">
             <span class="drop-icon">📄</span>
             <b>Click to choose your .mws file</b><br>
             <span style="font-size:12px;color:#888;">or drag and drop here</span>
             <input type="file" id="mws-upload-input" accept=".mws,.txt" onchange="handleMWSUpload(this.files[0])">
         </div>
+
+        <div style="margin-top: 15px; border-top: 1px solid #ddd; padding-top: 15px;">
+            <p style="font-size:13px;color:#555;margin-bottom:8px;"><b>Or paste a Share Code here:</b></p>
+            <textarea id="mws-paste-input" placeholder="Paste the long MWS code here..." style="width:100%; height:60px; padding:8px; border-radius:6px; border:1px solid #ccc; font-family:monospace; font-size:11px;"></textarea>
+            <button class="btn btn-green" style="width:100%; margin-top:8px;" onclick="loadFromPaste()">📥 Load from Code</button>
+        </div>
+
         <div id="scan-status"></div>
         <div style="margin-top:16px;display:flex;gap:10px;">
-            <button class="btn" style="background:#888;color:rgb(91, 127, 143);" onclick="$('#load-modal').hide()">Cancel</button>
+            <button class="btn" style="background:#888;color:white;" onclick="$('#load-modal').hide()">Cancel</button>
         </div>
-        <p style="font-size:11px;color:#bbb;margin-top:12px;">The .mws file is plain text — open it in any text editor to read your answers offline.</p>
     </div>
 </div>
 
@@ -279,7 +286,10 @@
         </div>
         <div style="display:flex;gap:10px;margin-top:10px;">
             <button class="btn btn-green" style="flex:2;padding:14px;" onclick="saveSession()">
-                💾 Save Session — .mws + PDF
+                💾 Save Session (.mws)
+            </button>
+            <button class="btn" style="flex:1;padding:14px;background:#e67e22;color:white;" onclick="copyShareCode()">
+                🔗 Copy Share Code
             </button>
             <button class="btn" style="flex:1;padding:14px;background:#555;color:white;" onclick="window.print()">
                 🖨️ PDF Only
@@ -389,9 +399,66 @@
     border-radius: 4px;
     display: block !important;
 ">
-    &copy; 2026 Yogen Jayesh Patel. The MYP Workspace™. All rights reserved.
+    &copy; 2026 Yogen Jayesh Patel · The MYP Workspace™
 </footer>
+<script>
+    // This runs as soon as the Workspace opens
+    window.onload = () => {
+        // Safe check: If someone is using the web version, 'window.electronAPI' won't exist, 
+        // so it safely skips the desktop lockdown without crashing!
+        if (window.electronAPI) {
+            window.electronAPI.setLockdown(true);
+        }
+    };
 
+    function finishExam() {
+        const isSure = confirm("Are you sure you want to finish? Your session will be auto-saved.");
+        
+        if (isSure) {
+            // 1. Force a final save of the current work
+            if (typeof saveWork === 'function') saveWork();
+            
+            // 2. Generate the MWS Code and save it
+            if (typeof encodeMWS === 'function') {
+                const mwsCode = encodeMWS();
+                const sessionDate = new Date().toLocaleString();
+                
+                let pastSessions = JSON.parse(localStorage.getItem('moz_past_sessions') || '[]');
+                pastSessions.push({ date: sessionDate, code: mwsCode });
+                localStorage.setItem('moz_past_sessions', JSON.stringify(pastSessions));
+            }
+
+            // 3. Unlock and Reset
+            if (window.electronAPI) {
+                window.electronAPI.setLockdown(false);
+            }
+            // WEB SAFE: Reloads the page to take the user back to the splash screen!
+            window.location.reload(); 
+        }
+    }
+
+    // --- NEW FUNCTIONS FOR SHARE CODES ---
+    function copyShareCode() {
+        if (typeof encodeMWS === 'function') {
+            if (typeof saveWork === 'function') saveWork();
+            const code = encodeMWS();
+            navigator.clipboard.writeText(code).then(() => {
+                alert("✅ Share Code copied to clipboard! Paste this code and share or store to send to someone or edit later");
+            }).catch(err => alert("Failed to copy."));
+        }
+    }
+
+    function loadFromPaste() {
+        const code = document.getElementById('mws-paste-input').value.trim();
+        if (!code) return alert("Please paste a code first.");
+        
+        const parsed = decodeMWS(code); 
+        if (!parsed) return alert("❌ Invalid Share Code. Make sure you copied the whole text.");
+        
+        document.getElementById('load-modal').style.display = 'none';
+        restoreSession(parsed.pdfUrl, parsed.blocks, parsed.savedSeconds, parsed.pdfSrcType);
+    }
+</script>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 <script src="script.js"></script>
 </body>
