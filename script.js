@@ -229,8 +229,10 @@ function launch(restore) {
     if(!restore) {
         const activeTab = document.getElementById('tab-upload').classList.contains('active');
         if(activeTab) {
-            if(!_uploadedPDFDataURL) return alert("Please choose a PDF file to upload.");
-            pdfSrc = _uploadedPDFDataURL;
+            // Use blob URL immediately if available (set as soon as file is picked),
+            // even if the slower base64 encoding hasn't finished yet
+            if(!_uploadedPDFBlobURL && !_uploadedPDFDataURL) return alert("Please choose a PDF file to upload.");
+            pdfSrc = _uploadedPDFBlobURL || _uploadedPDFDataURL;
             pdfSrcType = 'upload';
         } else {
             pdfSrc = document.getElementById('pdf-url').value.trim();
@@ -248,8 +250,11 @@ function launch(restore) {
         if(localStorage.getItem(LS_DRAFT) === "true") toggleDraft();
     } else {
         $("#q-list").empty();
+        // For uploaded PDFs, use blob URL for fast display; localStorage save happens in background
         document.getElementById('pdf-frame').src = pdfSrc;
-        localStorage.setItem(LS_PDF, pdfSrc);
+        if(pdfSrcType !== 'upload') {
+            localStorage.setItem(LS_PDF, pdfSrc);
+        }
         localStorage.setItem(LS_PDF_SRC, pdfSrcType);
     }
 
@@ -569,14 +574,26 @@ function changePDF() {
         input.type = 'file'; input.accept = 'application/pdf';
         input.onchange = function() {
             if(!input.files[0]) return;
+            const file = input.files[0];
+            // Show immediately via blob URL
+            if(_uploadedPDFBlobURL) URL.revokeObjectURL(_uploadedPDFBlobURL);
+            _uploadedPDFBlobURL = URL.createObjectURL(file);
+            document.getElementById('pdf-frame').src = _uploadedPDFBlobURL;
+            _pdfSaveReady = false;
+            // Save base64 in background for session recovery
             const reader = new FileReader();
             reader.onload = function(e) {
                 _uploadedPDFDataURL = e.target.result;
-                document.getElementById('pdf-frame').src = e.target.result;
-                localStorage.setItem(LS_PDF, e.target.result);
-                localStorage.setItem(LS_PDF_SRC, 'upload');
+                try {
+                    localStorage.setItem(LS_PDF, _uploadedPDFDataURL);
+                    localStorage.setItem(LS_PDF_SRC, 'upload');
+                    _pdfSaveReady = true;
+                } catch(err) {
+                    _pdfSaveReady = false;
+                    console.warn('PDF too large for localStorage, session recovery will skip PDF.');
+                }
             };
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         };
         input.click();
     } else {
@@ -584,6 +601,7 @@ function changePDF() {
         if(newUrl) {
             document.getElementById('pdf-frame').src = newUrl;
             _uploadedPDFDataURL = null;
+            _uploadedPDFBlobURL = null;
             localStorage.setItem(LS_PDF, newUrl);
             localStorage.setItem(LS_PDF_SRC, 'url');
         }
