@@ -4,6 +4,8 @@
 // ═══════════════════════════════════════════════════════════
 let seconds = 7200, running = false, draftEnabled = false;
 let _uploadedPDFDataURL = null; // base64 data URL of an uploaded PDF
+let _uploadedPDFBlobURL = null;  // fast blob URL for current-session display
+let _pdfSaveReady = false;       // true once background base64 save to localStorage is done
 
 const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform) ||
               (navigator.userAgent.includes('Mac') && !navigator.userAgent.includes('Windows'));
@@ -120,10 +122,20 @@ function recoverSession() {
 
     document.getElementById('splash-screen').style.display = 'none';
 
-    // Restore PDF
+    // Restore PDF — convert base64 back to blob URL so iframe renders fast
     if(pdfSrc) {
-        if(pdfSrcType === 'upload') {
-            document.getElementById('pdf-frame').src = pdfSrc;
+        if(pdfSrcType === 'upload' && pdfSrc.startsWith('data:')) {
+            _uploadedPDFDataURL = pdfSrc;
+            try {
+                const bytes = atob(pdfSrc.split(',')[1]);
+                const arr = new Uint8Array(bytes.length);
+                for(let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+                if(_uploadedPDFBlobURL) URL.revokeObjectURL(_uploadedPDFBlobURL);
+                _uploadedPDFBlobURL = URL.createObjectURL(new Blob([arr], {type:'application/pdf'}));
+                document.getElementById('pdf-frame').src = _uploadedPDFBlobURL;
+            } catch(e) {
+                document.getElementById('pdf-frame').src = pdfSrc;
+            }
         } else {
             document.getElementById('pdf-frame').src = pdfSrc;
         }
@@ -179,16 +191,32 @@ function switchSource(which) {
 
 function handlePDFUpload(file) {
     if(!file || file.type !== 'application/pdf') return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        _uploadedPDFDataURL = e.target.result;
-        localStorage.setItem(LS_PDF, _uploadedPDFDataURL);
-        localStorage.setItem(LS_PDF_SRC, 'upload');
-        document.getElementById('pdf-frame').src = _uploadedPDFDataURL;
-        document.getElementById('pdf-chosen-name').textContent = file.name;
-        document.getElementById('pdf-drop-zone').classList.add('has-file');
-    };
-    reader.readAsDataURL(file);
+
+    // Step 1: Show the PDF immediately — blob URL needs zero encoding, no lag
+    if(_uploadedPDFBlobURL) URL.revokeObjectURL(_uploadedPDFBlobURL);
+    _uploadedPDFBlobURL = URL.createObjectURL(file);
+    document.getElementById('pdf-frame').src = _uploadedPDFBlobURL;
+    document.getElementById('pdf-chosen-name').textContent = file.name;
+    document.getElementById('pdf-drop-zone').classList.add('has-file');
+
+    // Step 2: Save to localStorage once in the background (for session recovery)
+    // Deferred so the PDF is already visible before the slow base64 encoding starts
+    _pdfSaveReady = false;
+    setTimeout(function() {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            _uploadedPDFDataURL = e.target.result;
+            try {
+                localStorage.setItem(LS_PDF, _uploadedPDFDataURL);
+                localStorage.setItem(LS_PDF_SRC, 'upload');
+                _pdfSaveReady = true;
+            } catch(err) {
+                _pdfSaveReady = false;
+                console.warn('PDF too large for localStorage, session recovery will skip PDF.');
+            }
+        };
+        reader.readAsDataURL(file);
+    }, 200);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -597,7 +625,8 @@ function encodeMWS() {
     const urlB64       = btoa(unescape(encodeURIComponent(pdfSrc)));
     const blocksB64    = btoa(unescape(encodeURIComponent(JSON.stringify(blocks))));
     const typeB64      = btoa(pdfSrcType);
-    return `MWS:3:url=${urlB64}&blocks=${blocksB64}&type=${typeB64}&s=${seconds}`;
+    const pdfOk = (_uploadedPDFDataURL && _pdfSaveReady) ? '1' : '0';
+    return `MWS:3:url=${urlB64}&blocks=${blocksB64}&type=${typeB64}&s=${seconds}&pdfok=${pdfOk}`;
 }
 
 function decodeMWS(code) {
@@ -612,7 +641,8 @@ function decodeMWS(code) {
         const blocks       = JSON.parse(decodeURIComponent(escape(atob(params.blocks || 'W10='))));
         const savedSeconds = params.s ? parseInt(params.s, 10) : null;
         const pdfSrcType   = params.type ? atob(params.type) : 'url';
-        return { pdfUrl, blocks, savedSeconds, pdfSrcType };
+        const pdfOk = params.pdfok === '1';
+        return { pdfUrl, blocks, savedSeconds, pdfSrcType, pdfOk };
     } catch(e) { return null; }
 }
 
@@ -663,6 +693,17 @@ ${blocksHTML || '<p style="color:#aaa;font-style:italic;">No answer blocks found
 //  SAVE SESSION
 // ═══════════════════════════════════════════════════════════
 function saveSession() {
+    // If user uploaded a PDF but it hasn't finished saving yet, warn them
+    if(_uploadedPDFBlobURL && !_pdfSaveReady) {
+        const go = confirm(
+            '⚠️ Your PDF is still being prepared in the background.\n\n' +
+            'If you save now, the PDF will NOT be included in the .mws file — ' +
+            'you will need to re-upload it manually next time.\n\n' +
+            'Please save your PDF file locally before continuing.\n\n' +
+            'Save anyway without the PDF?'
+        );
+        if(!go) return;
+    }
     const mwsCode  = encodeMWS();
     const pdfUrl   = document.getElementById('pdf-frame').src || '';
     const dateStr  = new Date().toLocaleString();
@@ -740,7 +781,7 @@ function handleMWSUpload(file) {
         const parsed = decodeMWS(match[0]);
         if(!parsed) { statusEl.textContent = '❌ Session code is corrupted.'; return; }
         statusEl.textContent = '✅ Session found! Restoring…';
-        setTimeout(() => { $('#load-modal').hide(); restoreSession(parsed.pdfUrl, parsed.blocks, parsed.savedSeconds, parsed.pdfSrcType); }, 500);
+        setTimeout(() => { $('#load-modal').hide(); restoreSession(parsed.pdfUrl, parsed.blocks, parsed.savedSeconds, parsed.pdfSrcType, parsed.pdfOk); }, 500);
     };
     reader.onerror = function() { statusEl.textContent = '❌ Could not read file.'; };
     reader.readAsText(file);
@@ -751,15 +792,35 @@ function handleMWSUpload(file) {
 // ═══════════════════════════════════════════════════════════
 let _pendingRestore = null;
 
-function restoreSession(pdfUrl, blocks, savedSeconds, pdfSrcType) {
+function restoreSession(pdfUrl, blocks, savedSeconds, pdfSrcType, pdfOk) {
     document.getElementById('splash-screen').style.display = 'none';
-    document.getElementById('pdf-frame').src = pdfUrl;
 
-    // Track whether this was an uploaded PDF
-    if(pdfSrcType === 'upload' && pdfUrl.startsWith('data:')) {
+    // Load PDF — convert base64 back to blob URL so iframe renders fast
+    if(pdfSrcType === 'upload' && pdfUrl && pdfUrl.startsWith('data:')) {
         _uploadedPDFDataURL = pdfUrl;
+        try {
+            const bytes = atob(pdfUrl.split(',')[1]);
+            const arr = new Uint8Array(bytes.length);
+            for(let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+            if(_uploadedPDFBlobURL) URL.revokeObjectURL(_uploadedPDFBlobURL);
+            _uploadedPDFBlobURL = URL.createObjectURL(new Blob([arr], {type:'application/pdf'}));
+            document.getElementById('pdf-frame').src = _uploadedPDFBlobURL;
+        } catch(e) {
+            document.getElementById('pdf-frame').src = pdfUrl;
+        }
+    } else if(pdfSrcType === 'upload' && !pdfOk) {
+        // PDF was saved without the PDF being ready — inform user
+        _uploadedPDFDataURL = null;
+        document.getElementById('pdf-frame').src = '';
+        setTimeout(() => {
+            alert(
+                '📄 This session was saved before the PDF finished loading.\n\n' +
+                'Your answers have been restored, but you will need to re-upload your PDF manually using the "Change PDF" button.'
+            );
+        }, 800);
     } else {
         _uploadedPDFDataURL = null;
+        document.getElementById('pdf-frame').src = pdfUrl || '';
         document.getElementById('pdf-url').value = pdfUrl || '';
     }
 
