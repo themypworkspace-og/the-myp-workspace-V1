@@ -24,6 +24,36 @@ const LS_DIRTY   = 'myp_workspace_dirty';    // '1' if unsaved changes exist
 $(document).ready(function() {
     $(".tool-window").draggable({ handle: ".tool-nav", containment: "window" }).resizable({ handles: "se" });
 
+    // Pane Resizer Logic
+    const resizer = document.getElementById('pane-resizer');
+    const leftPane = document.getElementById('pdf-pane');
+    const container = document.getElementById('layout-box');
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        resizer.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const containerRect = container.getBoundingClientRect();
+        let newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+        if (newWidth < 15) newWidth = 15;
+        if (newWidth > 85) newWidth = 85;
+        leftPane.style.width = newWidth + '%';
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isResizing) {
+            isResizing = false;
+            resizer.classList.remove('dragging');
+            document.body.style.cursor = 'default';
+            saveWork();
+        }
+    });
+
     // Snip paste zone focus
     const pz = document.getElementById('snip-paste-zone');
     pz.addEventListener('focus', () => { if(pz.innerText.trim() === pz.dataset.placeholder) { pz.innerText=''; pz.style.color='#333'; } });
@@ -144,6 +174,7 @@ function recoverSession() {
 
     // Restore blocks
     $("#q-list").html(data);
+    rebindFloatingBoxes();
 
     // Re-enable autosave if it was on
     if(localStorage.getItem(LS_DRAFT) === 'true') {
@@ -157,6 +188,7 @@ function recoverSession() {
 
     running = true;
     startClock();
+    rebindFloatingBoxes(); // Twice to be sure or just once is fine
     fetch('https://api.countapi.xyz/hit/themypworkspace/launches-v1').catch(()=>{});
 }
 
@@ -246,6 +278,7 @@ function launch(restore) {
 
     if(restore) {
         $("#q-list").html(localStorage.getItem(LS_DATA));
+        rebindFloatingBoxes();
         document.getElementById('pdf-frame').src = localStorage.getItem(LS_PDF) || "";
         if(localStorage.getItem(LS_DRAFT) === "true") toggleDraft();
     } else {
@@ -264,8 +297,20 @@ function launch(restore) {
 
     // Always start autosave automatically when launching
     if(!draftEnabled) toggleDraft();
+    rebindFloatingBoxes();
 
     fetch('https://api.countapi.xyz/hit/themypworkspace/launches-v1').catch(()=>{});
+}
+
+function toggleGlobalLang() {
+    const btn = document.getElementById('global-lang-toggle');
+    const cur = btn.dataset.lang || 'en';
+    const next = cur === 'en' ? 'hi' : 'en';
+    btn.dataset.lang = next;
+    btn.textContent = next === 'en' ? '⌨️ EN' : '⌨️ Hindi';
+    btn.style.background = next === 'hi' ? '#e6f0fa' : '';
+    btn.style.color = next === 'hi' ? 'var(--ib-blue)' : '';
+    saveWork();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -476,19 +521,22 @@ function handleImageUpload(files, targetEditable) {
 // ═══════════════════════════════════════════════════════════
 function addSnip() {
     const id = 'block-' + Date.now();
-    $("#q-list").append(`<div class="q-block" id="${id}" style="border:2px dashed var(--snip-orange);background:#fffaf5;">
-        <div class="block-header" style="background:#fff1e6;color:var(--snip-orange);">
-            <span>✂️ QUESTION SNIP</span>
-            <div style="display:flex;gap:6px;align-items:center;">
-                <label class="t-btn-upload" style="cursor:pointer;">
+    $("#q-list").append(`<div class="q-block" id="${id}" style="border:2px dashed var(--snip-orange);background:#fffaf5; border-radius:12px; margin-bottom:24px;">
+        <div class="block-header" style="background:#fff1e6;color:var(--snip-orange); padding:12px 16px; border-bottom:1.5px solid #ffe8d6;">
+            <div style="display:flex; align-items:center; gap:8px; font-weight:800;">
+               <span>✂️ QUESTION SNIP</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <button class="t-btn" style="background:#fff; color:#333; font-weight:700;" onclick="startWebSnip('${id}')">📸 Take Screenshot</button>
+                <label class="t-btn-upload" style="cursor:pointer; background:white; border:1.5px solid #ffe8d6;">
                     📎 Upload Image
                     <input type="file" accept="image/*" style="display:none;" onchange="handleImageUpload(this.files, document.querySelector('#${id} .ans-editable')); this.value='';">
                 </label>
-                <button class="btn btn-danger" onclick="$('#${id}').remove();saveWork();">Remove</button>
+                <button class="btn btn-danger" style="padding:6px 12px;" onclick="$('#${id}').remove();saveWork();">Remove</button>
             </div>
         </div>
-        <div class="ans-editable" contenteditable="true" oninput="saveWork();" placeholder="Paste image here (Ctrl+V / Cmd+V) or use Upload above..."></div>
-        <div class="mac-paste-hint" id="mph-${id}" style="${isMac ? 'display:block;' : ''}">💡 Mac: Use <b>Cmd+Shift+4</b> to snip, then <b>Cmd+V</b> here — or use <b>📎 Upload Image</b> above.</div>
+        <div class="ans-editable" contenteditable="true" oninput="saveWork();" placeholder="Paste image here (Ctrl+V / Cmd+V) or use Upload above..." style="min-height:100px; padding:20px;"></div>
+        <div class="mac-paste-hint" id="mph-${id}" style="${isMac ? 'display:block;' : ''}; padding:8px 16px; border-top:1px solid #ffe8d6;">💡 Mac: Use <b>Cmd+Shift+4</b> to snip, then <b>Cmd+V</b> here.</div>
     </div>`);
     saveWork();
 }
@@ -513,46 +561,46 @@ function addQ() {
     const blockId = 'block-' + id;
     $("#q-list").append(`
         <div class="q-block" id="${blockId}">
-            <div class="block-header" style="background:#f8f9fa;color:var(--ib-blue);">
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <span>📝</span>
+            <div class="block-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <span style="font-size:18px;">📝</span>
                     <input type="text" class="q-label-input" placeholder="Question # (e.g. 1a)..." oninput="saveWork()">
                 </div>
-                <button class="btn btn-danger" onclick="$('#${blockId}').remove();saveWork();">Delete</button>
+                <button class="btn btn-danger" onclick="$('#${blockId}').remove();saveWork();">Delete Block</button>
             </div>
             <div class="toolbar">
                 <div class="tool-group">
-                    <button class="t-btn" onclick="document.execCommand('undo')">↶</button>
-                    <button class="t-btn" onclick="document.execCommand('redo')">↷</button>
+                    <button class="t-btn" title="Undo" onclick="document.execCommand('undo')">↶</button>
+                    <button class="t-btn" title="Redo" onclick="document.execCommand('redo')">↷</button>
                 </div>
                 <div class="tool-group">
-                    <button class="t-btn" onclick="document.execCommand('bold')"><b>B</b></button>
-                    <button class="t-btn" style="font-style:italic;" onclick="document.execCommand('italic')">I</button>
-                    <button class="t-btn" style="text-decoration:underline;" onclick="document.execCommand('underline')">U</button>
+                    <button class="t-btn" title="Bold" onclick="document.execCommand('bold')"><b>B</b></button>
+                    <button class="t-btn" title="Italic" style="font-style:italic;" onclick="document.execCommand('italic')">I</button>
+                    <button class="t-btn" title="Underline" style="text-decoration:underline;" onclick="document.execCommand('underline')">U</button>
                 </div>
                 <div class="tool-group">
-                    <button class="t-btn" onclick="document.execCommand('subscript')">x₂</button>
-                    <button class="t-btn" onclick="document.execCommand('superscript')">x²</button>
+                    <button class="t-btn" title="Subscript" onclick="document.execCommand('subscript')">x₂</button>
+                    <button class="t-btn" title="Superscript" onclick="document.execCommand('superscript')">x²</button>
                 </div>
                 <div class="tool-group">
-                    <button class="t-btn" onclick="document.execCommand('insertUnorderedList')">• List</button>
+                    <button class="t-btn" title="List" onclick="document.execCommand('insertUnorderedList')">• List</button>
                 </div>
                 <div class="tool-group">
-                    <button class="t-btn" onclick="insertTable()">田 Table</button>
+                    <button class="t-btn" title="Table" onclick="insertTable()">田 Table</button>
+                    <button class="t-btn" title="Add Text Box" style="color:var(--ib-blue); border-color:var(--ib-blue-light); background:#f0f7ff;" onclick="insertFloatingTextBox('${blockId}')">🔤 Text Box</button>
                 </div>
-                <div class="tool-group" style="border-right:none;">
-                    <label class="t-btn-upload" style="cursor:pointer;">
+                <div class="tool-group" style="padding:0 6px;">
+                    <button class="t-btn" style="font-weight:700;color:var(--ib-blue);border:1.5px dashed var(--ib-blue);background:#e6f0fa;padding:4px 10px;border-radius:6px;" onclick="startWebSnip('${blockId}')">📸 Screen Snip</button>
+                </div>
+                <div class="tool-group" style="border-right:none; padding-left:10px;">
+                    <label class="t-btn-upload" style="cursor:pointer; background:white;">
                         📎 Upload Image
                         <input type="file" accept="image/*" style="display:none;" onchange="handleImageUpload(this.files, document.querySelector('#${blockId} .ans-editable')); this.value='';">
                     </label>
                 </div>
             </div>
-            <div class="ans-editable" contenteditable="true" oninput="updateCounts(${id},this);saveWork();"></div>
-            <div class="mac-paste-hint" id="mph-${blockId}" style="${isMac ? 'display:block;' : ''}">
-                💡 Mac: Use <b>Cmd+Shift+4</b> to snip, then <b>Cmd+V</b> — or use <b>📎 Upload Image</b> above.
-            </div>
+            <div class="ans-editable" contenteditable="true" oninput="updateCounts(${id},this);saveWork();" style="min-height:180px;"></div>
             <div class="block-footer">
-                <span style="color:#aaa;font-style:italic;margin-right:auto;font-size:11px;">📎 Upload Image (all devices) or Ctrl+V / Cmd+V to paste a snip</span>
                 <span id="word-count-${id}">0 words</span>
                 <span id="char-count-${id}">0 chars</span>
             </div>
@@ -895,6 +943,16 @@ function restoreSession(pdfUrl, blocks, savedSeconds, pdfSrcType, pdfOk) {
                         </div>
                         <div class="tool-group">
                             <button class="t-btn" onclick="insertTable()">田 Table</button>
+                            <button class="t-btn" onclick="insertFloatingTextBox('${blockId}')">🔤 Text Box</button>
+                        </div>
+                        <div class="tool-group" style="padding:0 6px;">
+                            <button class="t-btn" style="font-weight:600;color:var(--ib-blue);border:1px dashed var(--ib-blue);background:#e6f0fa;padding:3px 8px;border-radius:4px;" onclick="startWebSnip('${blockId}')">📸 Screen Snip</button>
+                        </div>
+                        <div class="tool-group" style="padding:0 6px;">
+                            <select class="t-btn" style="background:#fff;border:1px solid #ccc;color:#333;font-size:12px;padding:3px;border-radius:4px;cursor:pointer;" onchange="document.getElementById('${blockId}').dataset.lang = this.value;">
+                                <option value="en">🌐 EN</option>
+                                <option value="hi" ${b.lang==='hi'?'selected':''}>🌐 Hindi</option>
+                            </select>
                         </div>
                         <div class="tool-group" style="border-right:none;">
                             <label class="t-btn-upload" style="cursor:pointer;">📎 Upload Image
@@ -969,11 +1027,188 @@ function refreshTargetDropdowns() {
 }
 
 function openTool(id) {
+    if (localStorage.getItem('moz_snip_instruction_hidden') !== 'true' && !window._snipInstructionShown) {
+        window._snipInstructionShown = true;
+        const popup = document.createElement('div');
+        popup.style.position = 'fixed';
+        popup.style.top = '20px';
+        popup.style.right = '20px';
+        popup.style.background = '#fff';
+        popup.style.borderLeft = '4px solid #005a96';
+        popup.style.padding = '16px';
+        popup.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
+        popup.style.borderRadius = '8px';
+        popup.style.zIndex = '9999999';
+        popup.style.maxWidth = '300px';
+        popup.style.fontFamily = 'Inter, sans-serif';
+        popup.innerHTML = `
+            <h4 style="margin:0 0 8px; color:#005a96; font-size:15px; font-weight:700;">💡 How to use Snipping</h4>
+            <p style="margin:0 0 12px; font-size:13px; color:#444; line-height:1.4;">
+            <b>1.</b> Click <span style="background:#eee;padding:2px 4px;border-radius:3px;border:1px solid #ccc;">📸 Screenshot &amp; Insert</span> or <span style="background:#e6f0fa;color:var(--ib-blue);margin-left:2px;padding:2px 4px;border-radius:3px;border:1px dashed var(--ib-blue);">📸 Screen Snip</span><br>
+            <b>2.</b> A browser prompt will ask you to share your screen. Select <b>"This Tab"</b> and click Allow/Share.<br>
+            <b>3.</b> The screen will darken. Click and drag the crosshair over your work to finish!
+            </p>
+            <label style="font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:12px;color:#666;">
+                <input type="checkbox" id="snip-instruction-hide"> Don't show this again
+            </label>
+            <button style="background:#005a96; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-size:13px; font-weight:600; cursor:pointer; width:100%;">Got it!</button>
+        `;
+        document.body.appendChild(popup);
+        popup.querySelector('button').onclick = () => {
+            if(document.getElementById('snip-instruction-hide').checked) {
+                localStorage.setItem('moz_snip_instruction_hidden', 'true');
+            }
+            popup.style.opacity = '0';
+            popup.style.transition = 'opacity 0.3s';
+            setTimeout(() => document.body.removeChild(popup), 300);
+        };
+    }
     $(`#${id}`).fadeIn();
     refreshTargetDropdowns();
-    if(id === 'draw-tool' && !_drawingToolLoaded) loadDrawingTool();
 }
 function closeTool(id) { $(`#${id}`).fadeOut(); }
+
+function startWebSnip(targetId, statusEl) {
+    if(statusEl) { statusEl.style.display='inline'; statusEl.textContent='⏳ Select "This Tab" to capture…'; }
+    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+        // Use native browser screen-sharing for a custom Web Snip Tool
+        navigator.mediaDevices.getDisplayMedia({ video: { displaySurface: 'browser' }, preferCurrentTab: true, audio: false })
+            .then(stream => {
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                    setTimeout(() => {
+                        const w = video.videoWidth;
+                        const h = video.videoHeight;
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(video, 0, 0, w, h);
+                        stream.getTracks().forEach(t => t.stop());
+                        
+                        // Create Snipping Overlay
+                        const overlay = document.createElement('div');
+                        overlay.style.position = 'fixed';
+                        overlay.style.inset = '0';
+                        overlay.style.zIndex = '999999';
+                        overlay.style.cursor = 'crosshair';
+                        overlay.style.backgroundImage = `url(${canvas.toDataURL('image/png')})`;
+                        overlay.style.backgroundSize = '100% 100%';
+                        overlay.style.backgroundPosition = 'center';
+                        overlay.style.backgroundRepeat = 'no-repeat';
+                        overlay.style.overflow = 'hidden';
+                        
+                        let isDrawing = false;
+                        let startX, startY;
+                        
+                        const selBox = document.createElement('div');
+                        selBox.style.position = 'absolute';
+                        selBox.style.border = '2px dashed #005a96';
+                        selBox.style.background = 'rgba(255,255,255,0.0)';
+                        selBox.style.boxShadow = '0 0 0 9999px rgba(0,0,0,0.6)';
+                        selBox.style.display = 'none';
+                        overlay.appendChild(selBox);
+                        
+                        overlay.onmousedown = (e) => {
+                            isDrawing = true;
+                            startX = e.clientX;
+                            startY = e.clientY;
+                            selBox.style.left = startX + 'px';
+                            selBox.style.top = startY + 'px';
+                            selBox.style.width = '0px';
+                            selBox.style.height = '0px';
+                            selBox.style.display = 'block';
+                        };
+                        
+                        overlay.onmousemove = (e) => {
+                            if(!isDrawing) return;
+                            const cw = e.clientX - startX;
+                            const ch = e.clientY - startY;
+                            selBox.style.left = (cw < 0 ? e.clientX : startX) + 'px';
+                            selBox.style.top = (ch < 0 ? e.clientY : startY) + 'px';
+                            selBox.style.width = Math.abs(cw) + 'px';
+                            selBox.style.height = Math.abs(ch) + 'px';
+                        };
+                        
+                        overlay.onmouseup = (e) => {
+                            isDrawing = false;
+                            const rect = selBox.getBoundingClientRect();
+                            
+                            if (document.body.contains(overlay)) document.body.removeChild(overlay);
+                            
+                            if (rect.width < 10 || rect.height < 10) {
+                                if (statusEl) statusEl.style.display = 'none';
+                                return alert("Snip too small, cancelled.");
+                            }
+                            
+                            const scaleX = w / window.innerWidth;
+                            const scaleY = h / window.innerHeight;
+                            
+                            const cropCanvas = document.createElement('canvas');
+                            cropCanvas.width = rect.width * scaleX;
+                            cropCanvas.height = rect.height * scaleY;
+                            const cropCtx = cropCanvas.getContext('2d');
+                            
+                            cropCtx.drawImage(
+                                canvas, 
+                                rect.left * scaleX, rect.top * scaleY, rect.width * scaleX, rect.height * scaleY,
+                                0, 0, cropCanvas.width, cropCanvas.height
+                            );
+                            
+                            const editable = document.querySelector(`#${targetId} .ans-editable`);
+                            if(editable) {
+                                const imgMsg = `<img src="${cropCanvas.toDataURL('image/png')}" style="max-width:100%;border:1px solid #ccc;margin-top:8px;display:block;">`;
+                                editable.focus();
+                                document.execCommand('insertHTML', false, imgMsg);
+                                saveWork();
+                                if(statusEl) { statusEl.textContent='✔ Snip Inserted!'; setTimeout(()=>{statusEl.style.display='none';},2500); }
+                            }
+                        };
+                        
+                        const hint = document.createElement('div');
+                        hint.textContent = '🖱️ Custom Web Snip: Click and drag over your answer or question to snip. Press Esc to cancel.';
+                        hint.style.position = 'absolute';
+                        hint.style.top = '20px';
+                        hint.style.left = '50%';
+                        hint.style.transform = 'translate(-50%)';
+                        hint.style.background = '#fff';
+                        hint.style.color = '#333';
+                        hint.style.padding = '10px 20px';
+                        hint.style.borderRadius = '20px';
+                        hint.style.fontWeight = 'bold';
+                        hint.style.fontFamily = 'sans-serif';
+                        hint.style.fontSize = '14px';
+                        hint.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                        hint.style.pointerEvents = 'none';
+                        overlay.appendChild(hint);
+                        
+                        document.body.appendChild(overlay);
+                        
+                        const escHandler = (e) => {
+                            if(e.key === 'Escape') {
+                                if (document.body.contains(overlay)) document.body.removeChild(overlay);
+                                window.removeEventListener('keydown', escHandler);
+                                if (statusEl) statusEl.style.display = 'none';
+                            }
+                        };
+                        window.addEventListener('keydown', escHandler);
+                        
+                    }, 600); // Allow browser adequate time to paint first frame
+                };
+            })
+            .catch(err => {
+                if(statusEl) statusEl.style.display='none';
+                openSnipModal(null, targetId);
+                alert("Capture cancelled. Please use the manual Paste method.");
+            });
+    } else {
+        if(statusEl) statusEl.style.display='none';
+        openSnipModal(null, targetId);
+        alert("Auto-screenshot blocked by browser (cross-origin). Use the Paste method.");
+    }
+}
 
 function triggerInsert(iframeId, selectId) {
     const sel = document.getElementById(selectId);
@@ -981,23 +1216,9 @@ function triggerInsert(iframeId, selectId) {
     if(!targetId) return alert("Please add an answer box first.");
     const editable = document.querySelector(`#${targetId} .ans-editable`);
     if(!editable) return alert("Could not find the selected answer box.");
-    const iframeEl = document.getElementById(iframeId);
-    if(!iframeEl) return;
+    
     const statusEl = document.getElementById(selectId.replace('-target','-status'));
-    if(statusEl) { statusEl.style.display='inline'; statusEl.textContent='⏳ Capturing…'; }
-    html2canvas(iframeEl, { useCORS:true, allowTaint:true, scale:1.5, logging:false })
-        .then(canvas => {
-            const img = `<img src="${canvas.toDataURL('image/png')}" style="max-width:100%;border:1px solid #ccc;margin-top:8px;display:block;">`;
-            editable.focus();
-            document.execCommand('insertHTML', false, img);
-            saveWork();
-            if(statusEl) { statusEl.textContent='✔ Inserted!'; setTimeout(()=>{statusEl.style.display='none';},2500); }
-        })
-        .catch(() => {
-            if(statusEl) statusEl.style.display='none';
-            openSnipModal(null, targetId);
-            alert("Auto-screenshot blocked by browser (cross-origin). Use the Paste method.");
-        });
+    startWebSnip(targetId, statusEl);
 }
 
 function openSnipModal(autoId, fallbackId) {
@@ -1032,5 +1253,149 @@ function insertFromSnipModal() {
     closeSnipModal();
 }
 
-// Lazy-load html2canvas
+// ═══════════════════════════════════════════════════════════
+//  GLOBAL TRANSLITERATION HANDLING (Google Input Style)
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keyup', async (e) => {
+    if (e.code !== 'Space' && e.code !== 'Enter' && e.code !== 'Period') return;
+    
+    // Check global lang tool
+    const lang = document.getElementById('global-lang-toggle').dataset.lang || 'en';
+    if (lang !== 'hi') return;
+
+    if (!e.target.classList.contains('ans-editable') && !e.target.classList.contains('floating-box')) return;
+
+    const sel = window.getSelection();
+    if (sel.rangeCount === 0) return;
+    
+    const node = sel.anchorNode;
+    if (node.nodeType !== Node.TEXT_NODE) return;
+    
+    const text = node.textContent;
+    const offset = sel.anchorOffset;
+    
+    const beforeCursor = text.slice(0, offset - 1); // skip the space/enter char
+    const lastSpaceIdx = beforeCursor.lastIndexOf(' ');
+    const lastWord = beforeCursor.slice(lastSpaceIdx + 1).trim();
+    
+    if (!lastWord || !/^[a-zA-Z]+$/.test(lastWord)) return; // Only transliterate english letters
+    
+    try {
+        const res = await fetch(`https://inputtools.google.com/request?text=${lastWord}&itc=hi-t-i0-und&num=1`);
+        const data = await res.json();
+        if (data && data[0] === 'SUCCESS' && data[1] && data[1][0] && data[1][0][1]) {
+            const hiWord = data[1][0][1][0]; // First prediction
+            
+            // Replace in text node
+            node.textContent = text.slice(0, lastSpaceIdx + 1) + hiWord + text.slice(offset - 1);
+            
+            // Restore cursor
+            const newOffset = lastSpaceIdx + 1 + hiWord.length + 1; // +1 for the space
+            const range = document.createRange();
+            range.setStart(node, Math.min(newOffset, node.textContent.length));
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            saveWork();
+        }
+    } catch(err) {
+        console.error("Transliteration failed", err);
+    }
+});
+
+// ═══════════════════════════════════════════════════════════
+//  FLOATING TEXT BOXES
+// ═══════════════════════════════════════════════════════════
+function insertFloatingTextBox(blockId) {
+    const editable = document.querySelector(`#${blockId} .ans-editable`);
+    if (!editable) return;
+    
+    editable.style.position = 'relative';
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = "floating-text-wrapper";
+    wrapper.contentEditable = "false"; 
+    wrapper.style.cssText = "position:absolute; top:20px; left:20px; z-index:100; display:inline-block; user-select:none; resize:both; overflow:hidden; border:1px solid #8db6db; border-radius:8px; box-shadow: 0 6px 16px rgba(0,0,0,0.12); background:white; min-width:140px; min-height:50px;";
+    
+    const header = document.createElement('div');
+    header.className = "floating-header";
+    header.style.cssText = "height:18px; background:#f0f7ff; cursor:move; display:flex; justify-content:space-between; align-items:center; padding:0 6px; border-bottom:1px solid #e1effe;";
+    
+    const dragHint = document.createElement('span');
+    dragHint.style.cssText = "font-size:10px; color:#93c5fd; font-weight:bold;";
+    dragHint.innerText = "\u22EE\u22EE";
+    
+    const del = document.createElement('button');
+    del.innerText = "\u00d7";
+    del.style.cssText = "background:none; border:none; color:#f87171; font-weight:bold; cursor:pointer; font-size:14px; line-height:1; padding:0 2px;";
+    del.onclick = () => { wrapper.remove(); saveWork(); };
+    
+    const box = document.createElement('div');
+    box.className = "floating-box ans-editable"; // and reusable class for lang logic
+    box.contentEditable = "true";
+    box.style.cssText = "padding:8px 12px; min-width:100%; min-height:30px; font-size:15px; color:#333; user-select:text; outline:none;";
+    box.innerText = "Type here";
+    
+    box.addEventListener('input', () => saveWork());
+    
+    header.appendChild(dragHint);
+    header.appendChild(del);
+    wrapper.appendChild(header);
+    wrapper.appendChild(box);
+    editable.appendChild(wrapper);
+    
+    bindBoxEvents(wrapper, header, box);
+    
+    box.focus();
+    saveWork();
+}
+
+function bindBoxEvents(wrapper, header, box) {
+    let isDragging = false, startX, startY, initX, initY;
+    header.onmousedown = (e) => {
+        isDragging = true;
+        startX = e.clientX; startY = e.clientY;
+        initX = parseInt(wrapper.style.left||0);
+        initY = parseInt(wrapper.style.top||0);
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    
+    // Global move for better tracking
+    const moveFn = (e) => {
+        if(!isDragging) return;
+        wrapper.style.left = (initX + (e.clientX - startX)) + "px";
+        wrapper.style.top = (initY + (e.clientY - startY)) + "px";
+    };
+    const upFn = () => {
+        if(isDragging) { isDragging = false; saveWork(); }
+    };
+    
+    document.addEventListener('mousemove', moveFn);
+    document.addEventListener('mouseup', upFn);
+    
+    // Clean up if removed
+    const observer = new MutationObserver((mutations) => {
+        if (!document.body.contains(wrapper)) {
+            document.removeEventListener('mousemove', moveFn);
+            document.removeEventListener('mouseup', upFn);
+            observer.disconnect();
+        }
+    });
+    observer.observe(document.body, {childList: true, subtree: true});
+}
+
+function rebindFloatingBoxes() {
+    document.querySelectorAll('.floating-text-wrapper').forEach(wrapper => {
+        const header = wrapper.querySelector('.floating-header');
+        const box = wrapper.querySelector('.floating-box');
+        const del = wrapper.querySelector('button');
+        if (header && box) {
+            if (del) del.onclick = () => { wrapper.remove(); saveWork(); };
+            bindBoxEvents(wrapper, header, box);
+        }
+    });
+}
+
+// Lazy-load html2canvas (still used for old code safety)
 (function(){ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; document.head.appendChild(s); })();

@@ -306,42 +306,45 @@ body, html { height: 100%; font-family: 'DM Sans', 'Segoe UI', Arial, sans-serif
    ── HEADER ──
 ═══════════════════════════════════════════════════════════ */
 header {
-    background: var(--ib-blue); color: white; height: 54px;
-    display: flex; align-items: center; padding: 0 16px;
+    background: #ffffff; color: var(--ib-blue); height: 60px;
+    display: flex; align-items: center; padding: 0 20px;
     box-sizing: border-box; position: relative; z-index: 9000;
-    gap: 4px;
+    gap: 8px; border-bottom: 1.5px solid #d4dce8; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 .header-brand {
-    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px;
-    background: rgba(255,255,255,0.15); padding: 5px 12px;
-    border-radius: 7px; cursor: pointer; border: 1px solid rgba(255,255,255,0.25);
-    letter-spacing: -0.3px; white-space: nowrap;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;
+    background: var(--ib-blue); color: white; padding: 6px 14px;
+    border-radius: 12px; cursor: pointer; border: none;
+    letter-spacing: -0.3px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,90,150,0.2);
 }
-.h-divider { width: 1px; height: 26px; background: rgba(255,255,255,0.2); margin: 0 6px; flex-shrink: 0; }
+.h-divider { width: 1.5px; height: 26px; background: #d4dce8; margin: 0 6px; flex-shrink: 0; }
 .h-spacer { flex-grow: 1; }
 .h-btn {
-    background: transparent; border: none; color: rgba(255,255,255,0.85);
-    padding: 5px 10px; border-radius: 6px; cursor: pointer;
-    font-size: 12.5px; font-family: inherit; font-weight: 500;
-    transition: all 0.15s; white-space: nowrap;
+    background: transparent; border: 1.5px solid transparent; color: var(--splash-muted);
+    padding: 6px 14px; border-radius: 20px; cursor: pointer;
+    font-size: 13px; font-family: inherit; font-weight: 600;
+    transition: all 0.2s; white-space: nowrap;
 }
-.h-btn:hover { background: rgba(255,255,255,0.15); color: white; }
-.h-btn-danger { background: rgba(220,38,38,0.8); color: white !important; }
-.h-btn-danger:hover { background: #dc2626 !important; }
+.h-btn:hover { background: #f0f4f9; border-color: #c5dcf0; color: var(--ib-blue); }
+.h-btn-danger { background: rgba(220,38,38,0.1); color: #dc2626 !important; border-color: rgba(220,38,38,0.2); }
+.h-btn-danger:hover { background: #dc2626 !important; color: white !important; }
 
 .timer-display {
-    background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2);
-    padding: 5px 12px; border-radius: 7px;
-    font-family: 'DM Mono', monospace; font-weight: 600; font-size: 16px;
-    letter-spacing: 1px; color: white;
+    background: #f0f4f9; border: 1.5px solid #d4dce8;
+    padding: 5px 14px; border-radius: 8px;
+    font-family: 'DM Mono', monospace; font-weight: 700; font-size: 16px;
+    letter-spacing: 1px; color: var(--ib-blue);
 }
-.timer-display.warning { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.5); color: #fca5a5; }
-.timer-display.critical { background: rgba(239,68,68,0.7); animation: timerPulse 1s infinite; }
+.timer-display.warning { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.5); color: #dc2626; }
+.timer-display.critical { background: rgba(239,68,68,0.2); color: #dc2626; border-color: #dc2626; animation: timerPulse 1s infinite; }
 @keyframes timerPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
 
 .autosave-label {
-    font-size: 11px; font-weight: 600;
-    display: flex; align-items: center; gap: 5px; white-space: nowrap;
+    font-size: 12px; font-weight: 600; color: var(--splash-muted) !important;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+#draft-toggle {
+    color: var(--ib-blue) !important; background: #e6f0fa !important; border: 1px solid #c5dcf0 !important; border-radius:12px;
 }
 .autosave-dot {
     width: 7px; height: 7px; border-radius: 50%;
@@ -354,49 +357,55 @@ header {
 /* ═══════════════════════════════════════════════════════════
    ── MAIN WORKSPACE ──
 ═══════════════════════════════════════════════════════════ */
-.main-container { display: flex; height: calc(100vh - 54px); width: 100%; position: relative; z-index: 1; }
-.pane { height: 100%; flex: 1; position: relative; border-right: 1px solid #d4dce8; }
-#work-pane {
-    background: #f4f7f9; overflow-y: auto;
-    padding: 24px; box-sizing: border-box;
+.main-container { display: flex; height: calc(100vh - 60px); width: 100%; position: relative; z-index: 1; }
+.pane { height: 100%; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+#pdf-pane { width: 45%; min-width: 20%; flex-shrink: 0; border-right: none; }
+#work-pane { flex: 1; min-width: 20%; background: #f4f7f9; overflow-y: auto; padding: 24px; box-sizing: border-box; }
+
+.resizer {
+    width: 8px; background: #d4dce8; cursor: col-resize; z-index: 10;
+    border-left: 1px solid #c5dcf0; border-right: 1px solid #c5dcf0;
+    transition: background 0.2s; display: flex; justify-content: center; align-items: center;
 }
+.resizer:hover, .resizer.dragging { background: var(--ib-blue-light); }
+.resizer::after { content: "⋮"; font-size: 16px; color: #888; }
 
 /* ═══════════════════════════════════════════════════════════
    ── Q BLOCKS ──
 ═══════════════════════════════════════════════════════════ */
 .q-block {
-    border: 1px solid #dde4ee; margin-bottom: 20px;
-    border-radius: 10px; background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04); overflow: hidden;
+    border: 1.5px solid #c5dcf0; margin-bottom: 24px;
+    border-radius: 12px; background: #fff;
+    box-shadow: 0 4px 12px rgba(0,90,150,0.04); overflow: hidden;
 }
 .block-header {
-    padding: 10px 14px; display: flex; justify-content: space-between;
-    align-items: center; border-bottom: 1px solid #eef1f6;
-    font-weight: 600; font-size: 13px;
+    padding: 12px 16px; display: flex; justify-content: space-between;
+    align-items: center; border-bottom: 1.5px solid #eef1f6;
+    font-weight: 600; font-size: 14px; background: #fafcfe;
 }
 .q-label-input {
-    font-family: inherit; font-size: 13px; border: 1.5px solid #dde4ee;
-    border-radius: 6px; padding: 5px 10px; font-weight: 600;
-    width: 200px; outline: none; color: var(--splash-text);
+    font-family: inherit; font-size: 14px; border: 1.5px solid #dde4ee;
+    border-radius: 8px; padding: 8px 14px; font-weight: 600;
+    width: 220px; outline: none; color: var(--splash-text); transition: all 0.2s;
 }
-.q-label-input:focus { border-color: var(--ib-blue); background: #fffef5; }
+.q-label-input:focus { border-color: var(--ib-blue); background: #fffef5; box-shadow: 0 0 0 3px rgba(0,90,150,0.1); }
 .toolbar {
-    background: #f7f9fc; padding: 7px 14px;
-    border-bottom: 1px solid #eef1f6; display: flex; gap: 4px; flex-wrap: wrap;
+    background: #ffffff; padding: 10px 16px;
+    border-bottom: 1.5px solid #f0f4f9; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
 }
-.tool-group { display: flex; gap: 2px; border-right: 1px solid #dde4ee; padding-right: 7px; margin-right: 3px; }
+.tool-group { display: flex; gap: 4px; border-right: 1.5px solid #eef1f6; padding-right: 10px; margin-right: 4px; align-items: center; }
 .t-btn {
-    background: white; border: 1px solid #dde4ee; padding: 4px 9px;
-    border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 12.5px;
-    min-width: 30px; transition: all 0.12s; font-family: inherit;
+    background: white; border: 1.5px solid #eef1f6; padding: 6px 10px;
+    border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; color: #444;
+    min-width: 32px; transition: all 0.15s; font-family: inherit; display: flex; align-items: center; justify-content: center;
 }
-.t-btn:hover { background: var(--ib-blue-light); border-color: var(--ib-blue); color: var(--ib-blue); }
+.t-btn:hover { background: #f8fbff; border-color: #c5dcf0; color: var(--ib-blue); }
 .t-btn-upload {
-    background: #eff8ff; border: 1px solid #c5dcf0; color: var(--ib-blue);
-    padding: 4px 9px; border-radius: 5px; cursor: pointer;
-    font-weight: 600; font-size: 12.5px;
+    background: #f0f7ff; border: 1.5px solid #c5dcf0; color: var(--ib-blue);
+    padding: 6px 12px; border-radius: 6px; cursor: pointer;
+    font-weight: 600; font-size: 13px; display: flex; align-items: center;
 }
-.t-btn-upload:hover { background: var(--ib-blue-light); }
+.t-btn-upload:hover { background: #e0f0ff; border-color: #93c5fd; }
 .ans-editable {
     min-height: 160px; padding: 20px; outline: none;
     background: white; font-size: 15px; line-height: 1.6;
@@ -416,10 +425,11 @@ header {
 /* ═══════════════════════════════════════════════════════════
    ── WORK PANE BUTTONS ──
 ═══════════════════════════════════════════════════════════ */
-.btn { padding: 10px 18px; cursor: pointer; border: none; border-radius: 8px; font-weight: 600; transition: 0.15s; font-family: inherit; font-size: 14px; }
-.btn-green { background: var(--green); color: white; }
+.btn { padding: 12px 20px; cursor: pointer; border: none; border-radius: 10px; font-weight: 700; transition: 0.15s; font-family: inherit; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.btn-green { background: #16a34a; color: white; }
 .btn-green:hover { background: #15803d; }
-.btn-danger { background: var(--red); color: white; font-size: 11px; padding: 5px 10px; border-radius: 5px; }
+.btn-danger { background: #dc2626; color: white; font-size: 12px; padding: 6px 12px; border-radius: 6px; border:none; box-shadow:none; }
+.btn-danger:hover { background: #b91c1c; }
 
 /* ═══════════════════════════════════════════════════════════
    ── TOOL WINDOWS ──
