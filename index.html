@@ -384,20 +384,19 @@
     </div>
 </div>
 
-<div id="draw-tool" class="tool-window" style="width:960px;height:700px;top:40px;left:40px;">
+<div id="draw-tool" class="tool-window" style="width:960px;height:700px;top:40px;left:40px;min-width:480px;min-height:360px;">
     <div class="tool-nav">
         <span style="display:flex; align-items:center; gap:8px;">
             <img src="mozzdraw.png" alt="MozzDraw" style="height:22px;width:auto;object-fit:contain;display:block;" onerror="this.style.display='none'">
-            <span>CheeseLabs Studios Drawing Tool by Mozzerella</span>
+            <span>CheeseLabs Drawing Tool by Mozzerella</span>
         </span>
-        <span onclick="closeTool('draw-tool')" style="cursor:pointer">×</span>
+        <span onclick="closeTool('draw-tool')" style="cursor:pointer;font-size:18px;line-height:1;">×</span>
     </div>
-    <iframe id="draw-iframe" src="https://mathigon.org/polypad/embed" width="100%" height="615px" style="border:none;" allow="clipboard-read; clipboard-write"></iframe>
-    <div class="insert-bar">
-        <label>📥 Insert into:</label>
-        <select id="draw-target"></select>
-        <button class="btn-insert" onclick="triggerInsert('draw-iframe','draw-target')">📸 Screenshot &amp; Insert</button>
-        <span class="insert-status" id="draw-status">✔ Inserted!</span>
+    <div id="draw-pane-mydraw" style="height:calc(100% - 80px); overflow:hidden;">
+        <div id="mydraw-placeholder" style="height:100%;display:flex;align-items:center;justify-content:center;color:#888;font-size:14px;background:#f8fafb;">
+            <span>Loading drawing tool…</span>
+        </div>
+        <iframe id="mydraw-iframe" src="" width="100%" height="100%" style="border:none;display:none;" allow="clipboard-read; clipboard-write"></iframe>
     </div>
 </div>
 
