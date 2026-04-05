@@ -431,37 +431,26 @@ function _prewarmDrawingTool() {
 setTimeout(_prewarmDrawingTool, 3000);
 
 function switchDrawTab(which) {
-    const polyPane   = document.getElementById('draw-pane-polypad');
-    const myPane     = document.getElementById('draw-pane-mydraw');
-    const btnPoly    = document.getElementById('draw-tab-polypad');
-    const btnMy      = document.getElementById('draw-tab-mydraw');
-    const insPolypad = document.getElementById('draw-insert-polypad');
-    const insMydraw  = document.getElementById('draw-insert-mydraw');
-
-    if(which === 'polypad') {
-        polyPane.style.display = 'block'; myPane.style.display = 'none';
-        btnPoly.style.background = 'rgba(255,255,255,0.25)'; btnPoly.style.color = 'white';
-        btnMy.style.background = 'transparent'; btnMy.style.color = 'rgba(255,255,255,0.7)';
-        insPolypad.style.display = 'inline-block'; insMydraw.style.display = 'none';
-    } else {
-        polyPane.style.display = 'none'; myPane.style.display = 'block';
-        btnMy.style.background = 'rgba(255,255,255,0.25)'; btnMy.style.color = 'white';
-        btnPoly.style.background = 'transparent'; btnPoly.style.color = 'rgba(255,255,255,0.7)';
-        insPolypad.style.display = 'none'; insMydraw.style.display = 'inline-block';
-        if(!_drawingToolLoaded) loadDrawingTool();
-    }
+    // Simplified: only our drawing tool now
+    if(which !== 'polypad' && !_drawingToolLoaded) loadDrawingTool();
 }
 
 function loadDrawingTool() {
     _drawingToolLoaded = true;
     const placeholder = document.getElementById('mydraw-placeholder');
     const iframe = document.getElementById('mydraw-iframe');
+    if (!iframe) return;
     const url = _drawingBlobURL || (() => {
         const blob = new Blob([getDrawingToolSrc()], { type: 'text/html' });
-        return URL.createObjectURL(blob);
+        _drawingBlobURL = URL.createObjectURL(blob);
+        return _drawingBlobURL;
     })();
     iframe.src = url;
-    iframe.onload = () => { if(placeholder) placeholder.style.display = 'none'; };
+    iframe.style.display = 'block';
+    iframe.onload = () => {
+        if(placeholder) placeholder.style.display = 'none';
+        iframe.style.height = '100%';
+    };
 }
 
 window.addEventListener('message', function(e) {
