@@ -19,6 +19,47 @@ const LS_TIMER   = 'myp_workspace_timer';
 const LS_DIRTY   = 'myp_workspace_dirty';    // '1' if unsaved changes exist
 
 // ═══════════════════════════════════════════════════════════
+//  THEME LOGIC
+// ═══════════════════════════════════════════════════════════
+function updateThemeButtons(isDark) {
+    const textLabel = isDark ? 'Light Mode' : 'Dark Mode';
+    const iconLabel = isDark ? '☀️' : '🌙';
+    document.querySelectorAll('.theme-toggle').forEach(btn => {
+        const iconSpan = btn.querySelector('#theme-toggle-icon');
+        const textSpan = btn.querySelector('.theme-toggle-text');
+        if (iconSpan && textSpan) {
+             iconSpan.textContent = iconLabel;
+             textSpan.textContent = textLabel;
+        } else {
+             btn.textContent = `${iconLabel} ${textLabel}`;
+        }
+    });
+}
+function initTheme() {
+    const savedTheme = localStorage.getItem('myp_theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+    // Set initial text/icon after DOM is parsed but immediately for safety
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => updateThemeButtons(savedTheme === 'dark'));
+    } else {
+        updateThemeButtons(savedTheme === 'dark');
+    }
+}
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    updateThemeButtons(isDark);
+    localStorage.setItem('myp_theme', isDark ? 'dark' : 'light');
+    const iframe = document.getElementById('mydraw-iframe');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'theme-change', theme: isDark ? 'dark' : 'light' }, '*');
+    }
+}
+initTheme();
+
+// ═══════════════════════════════════════════════════════════
 //  DOCUMENT READY
 // ═══════════════════════════════════════════════════════════
 $(document).ready(function() {
@@ -308,7 +349,7 @@ function toggleGlobalLang() {
     const next = cur === 'en' ? 'hi' : 'en';
     btn.dataset.lang = next;
     btn.textContent = next === 'en' ? '⌨️ EN' : '⌨️ Hindi';
-    btn.style.background = next === 'hi' ? '#e6f0fa' : '';
+    btn.style.background = next === 'hi' ? 'var(--ib-blue-light)' : '';
     btn.style.color = next === 'hi' ? 'var(--ib-blue)' : '';
     saveWork();
 }
@@ -422,16 +463,11 @@ let _drawingToolLoaded = false;
 let _drawingBlobURL = null;
 
 function _prewarmDrawingTool() {
-    if(_drawingBlobURL) return;
-    try {
-        const blob = new Blob([getDrawingToolSrc()], { type: 'text/html' });
-        _drawingBlobURL = URL.createObjectURL(blob);
-    } catch(e) {}
+    // Rely on loadDrawingTool instead since it is a local file
 }
 setTimeout(_prewarmDrawingTool, 3000);
 
 function switchDrawTab(which) {
-    // Simplified: only our drawing tool now
     if(which !== 'polypad' && !_drawingToolLoaded) loadDrawingTool();
 }
 
@@ -440,17 +476,27 @@ function loadDrawingTool() {
     const placeholder = document.getElementById('mydraw-placeholder');
     const iframe = document.getElementById('mydraw-iframe');
     if (!iframe) return;
-    const url = _drawingBlobURL || (() => {
-        const blob = new Blob([getDrawingToolSrc()], { type: 'text/html' });
-        _drawingBlobURL = URL.createObjectURL(blob);
-        return _drawingBlobURL;
-    })();
-    iframe.src = url;
+    
+    if (!iframe.src || iframe.src.endsWith('about:blank') || iframe.src === window.location.href) {
+        iframe.src = 'drawing-tool.html';
+    }
+    
     iframe.style.display = 'block';
+    
     iframe.onload = () => {
         if(placeholder) placeholder.style.display = 'none';
         iframe.style.height = '100%';
+        const isDark = document.body.classList.contains('dark-mode');
+        iframe.contentWindow.postMessage({ type: 'theme-change', theme: isDark ? 'dark' : 'light' }, '*');
     };
+    
+    // In case it's already loaded
+    if(iframe.contentDocument && iframe.contentDocument.readyState === 'complete' && iframe.src.includes('drawing-tool.html')) {
+        if(placeholder) placeholder.style.display = 'none';
+        iframe.style.height = '100%';
+        const isDark = document.body.classList.contains('dark-mode');
+        iframe.contentWindow.postMessage({ type: 'theme-change', theme: isDark ? 'dark' : 'light' }, '*');
+    }
 }
 
 window.addEventListener('message', function(e) {
@@ -510,22 +556,22 @@ function handleImageUpload(files, targetEditable) {
 // ═══════════════════════════════════════════════════════════
 function addSnip() {
     const id = 'block-' + Date.now();
-    $("#q-list").append(`<div class="q-block" id="${id}" style="border:2px dashed var(--snip-orange);background:#fffaf5; border-radius:12px; margin-bottom:24px;">
-        <div class="block-header" style="background:#fff1e6;color:var(--snip-orange); padding:12px 16px; border-bottom:1.5px solid #ffe8d6;">
+    $("#q-list").append(`<div class="q-block" id="${id}" style="border:2px dashed var(--snip-orange);background:var(--ws-card); border-radius:12px; margin-bottom:24px;">
+        <div class="block-header" style="background:var(--ws-bg);color:var(--snip-orange); padding:12px 16px; border-bottom:1.5px solid var(--ws-border);">
             <div style="display:flex; align-items:center; gap:8px; font-weight:800;">
                <span>✂️ QUESTION SNIP</span>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
-                <button class="t-btn" style="background:#fff; color:#333; font-weight:700;" onclick="startWebSnip('${id}')">📸 Take Screenshot</button>
-                <label class="t-btn-upload" style="cursor:pointer; background:white; border:1.5px solid #ffe8d6;">
+                <button class="t-btn" style="font-weight:700;" onclick="startWebSnip('${id}')">📸 Take Screenshot</button>
+                <label class="t-btn-upload" style="cursor:pointer;">
                     📎 Upload Image
                     <input type="file" accept="image/*" style="display:none;" onchange="handleImageUpload(this.files, document.querySelector('#${id} .ans-editable')); this.value='';">
                 </label>
-                <button class="btn btn-danger" style="padding:6px 12px;" onclick="$('#${id}').remove();saveWork();">Remove</button>
+                <button class="btn btn-danger" style="padding:6px 12px; background:var(--red); color:white; border:none; border-radius:6px;" onclick="$('#${id}').remove();saveWork();">Remove</button>
             </div>
         </div>
-        <div class="ans-editable" contenteditable="true" oninput="saveWork();" placeholder="Paste image here (Ctrl+V / Cmd+V) or use Upload above..." style="min-height:100px; padding:20px;"></div>
-        <div class="mac-paste-hint" id="mph-${id}" style="${isMac ? 'display:block;' : ''}; padding:8px 16px; border-top:1px solid #ffe8d6;">💡 Mac: Use <b>Cmd+Shift+4</b> to snip, then <b>Cmd+V</b> here.</div>
+        <div class="ans-editable" contenteditable="true" oninput="saveWork();" placeholder="Paste image here (Ctrl+V / Cmd+V) or use Upload above..." style="min-height:100px; padding:20px; background:var(--ws-card); color:var(--ws-text);"></div>
+        <div class="mac-paste-hint" id="mph-${id}" style="${isMac ? 'display:block;' : ''}; padding:8px 16px; border-top:1px solid var(--ws-border); background:var(--ws-bg); color:var(--ws-text);">💡 Mac: Use <b>Cmd+Shift+4</b> to snip, then <b>Cmd+V</b> here.</div>
     </div>`);
     saveWork();
 }
@@ -576,19 +622,19 @@ function addQ() {
                 </div>
                 <div class="tool-group">
                     <button class="t-btn" title="Table" onclick="insertTable()">田 Table</button>
-                    <button class="t-btn" title="Add Text Box" style="color:var(--ib-blue); border-color:var(--ib-blue-light); background:#f0f7ff;" onclick="insertFloatingTextBox('${blockId}')">🔤 Text Box</button>
+                    <button class="t-btn" title="Add Text Box" style="color:var(--ib-blue); border-color:var(--ib-blue); background:var(--ib-blue-light);" onclick="insertFloatingTextBox('${blockId}')">🔤 Text Box</button>
                 </div>
                 <div class="tool-group" style="padding:0 6px;">
-                    <button class="t-btn" style="font-weight:700;color:var(--ib-blue);border:1.5px dashed var(--ib-blue);background:#e6f0fa;padding:4px 10px;border-radius:6px;" onclick="startWebSnip('${blockId}')">📸 Screen Snip</button>
+                    <button class="t-btn" style="font-weight:700;color:var(--ib-blue);border:1.5px dashed var(--ib-blue);background:var(--ib-blue-light);padding:4px 10px;border-radius:6px;" onclick="startWebSnip('${blockId}')">📸 Screen Snip</button>
                 </div>
                 <div class="tool-group" style="border-right:none; padding-left:10px;">
-                    <label class="t-btn-upload" style="cursor:pointer; background:white;">
+                    <label class="t-btn-upload" style="cursor:pointer;">
                         📎 Upload Image
                         <input type="file" accept="image/*" style="display:none;" onchange="handleImageUpload(this.files, document.querySelector('#${blockId} .ans-editable')); this.value='';">
                     </label>
                 </div>
             </div>
-            <div class="ans-editable" contenteditable="true" oninput="updateCounts(${id},this);saveWork();" style="min-height:180px;"></div>
+            <div class="ans-editable" contenteditable="true" oninput="updateCounts(${id},this);saveWork();" style="min-height:180px; background:var(--ws-card); color:var(--ws-text);"></div>
             <div class="block-footer">
                 <span id="word-count-${id}">0 words</span>
                 <span id="char-count-${id}">0 chars</span>
@@ -1016,6 +1062,9 @@ function refreshTargetDropdowns() {
 }
 
 function openTool(id) {
+    if (id === 'draw-tool') {
+        loadDrawingTool();
+    }
     if (localStorage.getItem('moz_snip_instruction_hidden') !== 'true' && !window._snipInstructionShown) {
         window._snipInstructionShown = true;
         const popup = document.createElement('div');

@@ -162,7 +162,8 @@
     <!-- Top bar -->
     <div class="splash-topbar">
         <div class="splash-topbar-brand">The MYP Workspace™</div>
-        <div class="splash-topbar-links">
+        <div class="splash-topbar-links" style="align-items: center;">
+            <button class="h-btn theme-toggle" onclick="toggleDarkMode()" style="background:transparent; border:none; color:rgba(255,255,255,0.75); font-size:15px; cursor:pointer; padding: 0;" title="Toggle Dark Mode" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.75)'">🌙 Dark Mode</button>
             <a href="#" onclick="$('#terms-modal').show();return false;">Terms &amp; Privacy</a>
             <a href="/cdn-cgi/l/email-protection#83f7ebe6adeefaf3adf4ecf1e8f0f3e2e0e6c3e4eee2eaefade0ecee">Contact</a>
         </div>
@@ -314,12 +315,21 @@
     <button class="h-btn" onclick="toggleLR()">Swap Sides</button>
     <div class="h-divider"></div>
     <!-- Autosave indicator -->
-    <div class="autosave-label">
-        <span class="autosave-dot" id="autosave-dot"></span>
-        <span id="autosave-label-text">Autosave Off</span>
+    <div class="autosave-wrapper">
+        <div class="autosave-label">
+            <span class="autosave-dot" id="autosave-dot"></span>
+            <span id="autosave-label-text">Autosave Off</span>
+        </div>
     </div>
     <button id="draft-toggle" class="h-btn" onclick="toggleDraft()" style="margin-left:4px;font-size:11px;">OFF</button>
     <div class="h-spacer"></div>
+    <div class="autosave-wrapper theme-toggle" onclick="toggleDarkMode()" style="cursor:pointer;" title="Toggle Theme">
+        <div class="autosave-label">
+            <span id="theme-toggle-icon" style="font-size:14px; margin-left: 4px;">🌙</span>
+            <span class="theme-toggle-text" style="max-width: 0; opacity: 0; overflow: hidden; transition: max-width 0.3s ease, opacity 0.3s ease; display: inline-block; white-space: nowrap; vertical-align: middle; font-size: 13px; font-weight: 600; color: var(--splash-muted);">Dark Mode</span>
+        </div>
+    </div>
+    <div class="h-divider"></div>
     <button class="h-btn" id="global-lang-toggle" onclick="toggleGlobalLang()" data-lang="en">⌨️ EN</button>
     <div class="h-divider"></div>
     <button class="h-btn" onclick="openTool('math-tool')">Σ Equations</button>
