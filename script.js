@@ -7,6 +7,9 @@ let _uploadedPDFDataURL = null; // base64 data URL of an uploaded PDF
 let _uploadedPDFBlobURL = null;  // fast blob URL for current-session display
 let _pdfSaveReady = false;       // true once background base64 save to localStorage is done
 
+let lockdownPasskey = null;
+let inWebLockdown = false;
+
 const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform) ||
               (navigator.userAgent.includes('Mac') && !navigator.userAgent.includes('Windows'));
 
@@ -341,6 +344,20 @@ function launch(restore) {
     rebindFloatingBoxes();
 
     fetch('https://api.countapi.xyz/hit/themypworkspace/launches-v1').catch(()=>{});
+
+    // Check lockdown mode
+    const lockdownCb = document.getElementById('lockdown-checkbox');
+    if(!restore && lockdownCb && lockdownCb.checked) {
+        setTimeout(() => {
+            const key = prompt('🔒 Set a Passkey to enable Lockdown Mode.\n\nYou will need this passkey to submit your exam or exit fullscreen.');
+            if(key) {
+                enableLockdown(key);
+            } else {
+                alert('Lockdown Mode cancelled. Proceeding normally.');
+                lockdownCb.checked = false;
+            }
+        }, 100);
+    }
 }
 
 function toggleGlobalLang() {
@@ -1435,5 +1452,93 @@ function rebindFloatingBoxes() {
     });
 }
 
+// ═══════════════════════════════════════════════════════════
+//  BROWSER LOCKDOWN LOGIC
+// ═══════════════════════════════════════════════════════════
+function enableLockdown(passkey) {
+    lockdownPasskey = passkey;
+    inWebLockdown = true;
+    
+    // Show UI element
+    document.getElementById('exit-lockdown-btn').style.display = 'inline-block';
+    
+    alert("Lockdown Mode Enabled!\n\nTo exit later, use the 'Exit Lockdown 🔒' button in the header.\n\nIf you forget your passkey, you can type 'EMERGENCY' to escape.");
+    
+    // Request fullscreen
+    const de = document.documentElement;
+    if(de.requestFullscreen) de.requestFullscreen().catch(()=>{});
+    else if(de.webkitRequestFullscreen) de.webkitRequestFullscreen().catch(()=>{});
+    
+    // Context menu block
+    document.addEventListener('contextmenu', lockdownContextMenuHandler);
+    // Beforeunload block
+    window.addEventListener('beforeunload', lockdownBeforeUnloadHandler);
+}
+
+function attemptExitLockdown() {
+    const attempt = prompt("Enter your passkey to exit Lockdown Mode\n(or type 'EMERGENCY' if you forgot it):");
+    if(attempt === lockdownPasskey || attempt === 'EMERGENCY') {
+        endLockdown();
+        // Give optional quick save
+        const finish = confirm("Lockdown exited successfully. Do you want to explicitly save your work as a .mws file now?");
+        if(finish) {
+            saveSession();
+        }
+    } else if(attempt !== null) {
+        alert("❌ Incorrect passkey.");
+    }
+}
+
+function endLockdown() {
+    inWebLockdown = false;
+    lockdownPasskey = null;
+    
+    document.getElementById('exit-lockdown-btn').style.display = 'none';
+    document.getElementById('lockdown-overlay').style.display = 'none';
+    
+    document.removeEventListener('contextmenu', lockdownContextMenuHandler);
+    window.removeEventListener('beforeunload', lockdownBeforeUnloadHandler);
+    
+    if(document.fullscreenElement) {
+        if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen().catch(()=>{});
+    }
+}
+
+function returnToFullscreen() {
+    const de = document.documentElement;
+    if(de.requestFullscreen) {
+        de.requestFullscreen().then(() => {
+            document.getElementById('lockdown-overlay').style.display = 'none';
+        }).catch(()=>{});
+    } else if(de.webkitRequestFullscreen) {
+        de.webkitRequestFullscreen().then(() => {
+            document.getElementById('lockdown-overlay').style.display = 'none';
+        }).catch(()=>{});
+    }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    if(inWebLockdown && !document.fullscreenElement) {
+        // They exited fullscreen via ESC
+        document.getElementById('lockdown-overlay').style.display = 'flex';
+    } else if (inWebLockdown && document.fullscreenElement) {
+        document.getElementById('lockdown-overlay').style.display = 'none';
+    }
+});
+
+function lockdownContextMenuHandler(e) {
+    if (inWebLockdown) e.preventDefault();
+}
+
+function lockdownBeforeUnloadHandler(e) {
+    if (inWebLockdown) {
+        e.preventDefault();
+        e.returnValue = "You are in an active exam lockdown. Are you sure you want to leave?";
+        return e.returnValue;
+    }
+}
+
 // Lazy-load html2canvas (still used for old code safety)
 (function(){ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; document.head.appendChild(s); })();
+

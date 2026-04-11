@@ -2,16 +2,6 @@
   <html>
 
 <head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KH0SBL4EF3"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-KH0SBL4EF3');
-</script>
-  
   <meta name="google-site-verification" content="Ayhrwzw5MZ77kw0LMedBUKV8k4KIkgvsE-isnf5lSXI" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,7 +44,7 @@
      TERMS MODAL
 ═══════════════════════════════════════════════════════ -->
 <div id="terms-modal" class="modal-overlay">
-    <div class="modal-box">
+<div class="modal-box">
         <h2>Terms &amp; Conditions for MYP Workspace™</h2>
         <p style="font-size:12px;color:#94a3b8;margin-top:-8px;margin-bottom:16px;">Last Updated: April 11, 2026</p>
 
@@ -272,17 +262,23 @@
                 </div>
 
                 <!-- Timer + Actions -->
-                <div class="launch-bottom-row">
+                <div class="launch-bottom-row" style="flex-wrap: wrap;">
                     <div class="timer-input-group">
                         <label>⏱ Timer</label>
                         <input type="text" id="timer-input" value="02:00:00">
                     </div>
-                    <div class="launch-actions">
+                    <div class="launch-actions" style="margin-bottom: 8px;">
                         <button class="btn-launch-load" onclick="$('#load-modal').show()">📂 Load Saved Session</button>
                         <button class="btn-launch-go" onclick="launch(false)">Launch Workspace →</button>
                     </div>
+                    <div style="width: 100%; display: flex; justify-content: flex-end; align-items: center; margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 12px;">
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #b91c1c;">
+                            <input type="checkbox" id="lockdown-checkbox" style="width: 16px; height: 16px; accent-color: #b91c1c;">
+                            🔒 Enable Lockdown Mode
+                        </label>
+                    </div>
                 </div>
-                <p class="tos-line">By launching, you agree to our <a href="#" onclick="$('#terms-modal').show();return false;">Terms and Conditions</a></p>
+                <p class="tos-line" style="margin-top: 12px;">By launching, you agree to our <a href="#" onclick="$('#terms-modal').show();return false;">Terms and Conditions</a></p>
             </div>
         </div>
 
@@ -383,6 +379,7 @@
     <div class="h-divider"></div>
     <div class="timer-display" id="timer-txt">02:00:00</div>
     <button class="h-btn h-btn-danger" onclick="toggleTimer()" id="p-btn">Pause</button>
+    <button class="h-btn h-btn-danger" id="exit-lockdown-btn" onclick="attemptExitLockdown()" style="display:none; margin-left:8px; background:#b91c1c; color:white; font-weight:600;">Exit Lockdown 🔒</button>
 </header>
 
 <!-- TABLET PANE TABS -->
@@ -505,6 +502,20 @@
 ">
     &copy; 2026 Mozzerella Company · The MYP Workspace™
 </footer>
+
+<!-- ═══════════════════════════════════════════════════════
+     LOCKDOWN VIOLATION OVERLAY
+═══════════════════════════════════════════════════════ -->
+<div id="lockdown-overlay" style="display:none;position:fixed;inset:0;background:var(--ib-blue);color:white;z-index:999999;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px;">
+    <div style="font-size:64px;margin-bottom:20px;">🔒</div>
+    <h1 style="font-family:'Syne',sans-serif;margin-bottom:16px;">Lockdown Violation</h1>
+    <p style="font-size:18px;max-width:600px;margin-bottom:32px;line-height:1.5;">You have exited full-screen mode while a lockdown is active. Please return to your exam environment or enter your passkey to exit.</p>
+    <div style="display:flex;gap:16px;">
+        <button class="btn btn-green" style="padding:16px 32px;font-size:16px;box-shadow:0 10px 20px rgba(0,0,0,0.3);" onclick="returnToFullscreen()">Return to Exam</button>
+        <button class="btn" style="background:#b91c1c;color:white;padding:16px 32px;font-size:16px;box-shadow:0 10px 20px rgba(0,0,0,0.3);border:none;" onclick="attemptExitLockdown()">Exit &amp; Enter Passkey</button>
+    </div>
+</div>
+
 <script>
     // This runs as soon as the Workspace opens
     window.onload = () => {
